@@ -113,7 +113,7 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
           <p>{variant?.description}</p>
           {variant?.sustainability_connection ? <p>{variant.sustainability_connection}</p> : null}
         </div>
-        <PartVisual animation={component.animation} states={component.animation_controls.states} xray={component.animation === "fuel_flow" || component.id === "energy_recovery" || component.id === "power_unit"} />
+        <PartVisual id={component.id} animation={component.animation} states={component.animation_controls.states} />
       </div>
       <div className="grid-2" style={{ marginTop: 12 }}>
         {(variant?.metric_ids.length ? variant.metric_ids : component.metric_ids).map((id) => (
@@ -149,7 +149,7 @@ function PowerCompare() {
   )
 }
 
-function PartVisual({ animation, states, xray }: { animation: string; states?: string[]; xray: boolean }) {
+function PartVisual({ id, animation, states }: { id: string; animation: string; states?: string[] }) {
   const reduced = useDemo((store) => store.state.reducedMotion)
   const [playing, setPlaying] = useState(true)
   const [index, setIndex] = useState(0)
@@ -160,18 +160,16 @@ function PartVisual({ animation, states, xray }: { animation: string; states?: s
   }, [playing, reduced, states])
   const state = states?.[index]
   return (
-    <div className={xray ? "part-visual xray" : "part-visual"} aria-label="Explanatory illustration">
-      {animation === "wing_mode_toggle" ? <div className={state === "Straight Mode" ? "wing straight" : "wing"} /> : null}
-      {animation === "gear_selector" ? <p className="flare" style={{ fontSize: 42, margin: 0 }}>{state ?? "8"}</p> : null}
-      {animation === "recover_store_deploy" ? <p className="flare">{state ?? "Recover"}</p> : null}
-      {animation !== "gear_selector" ? (
-        <div className="flow" aria-hidden="true">{playing && !reduced ? <span /> : <span style={{ animation: "none", width: "70%" }} />}</div>
-      ) : null}
+    <div className="part-visual">
+      <img src={`/assets/parts/${id}.jpg`} alt="" />
+      {state ? <p className="flare" style={{ marginBottom: 0 }}>{state}</p> : null}
       <p>{caption(animation, state)}</p>
-      <div className="chips">
-        <button className="chip" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause" : "Play"}</button>
-        <button className="chip" type="button" onClick={() => { setIndex(0); setPlaying(false) }}>Reset</button>
-      </div>
+      {states?.length ? (
+        <div className="chips">
+          <button className="chip" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause" : "Play"}</button>
+          <button className="chip" type="button" onClick={() => { setIndex(0); setPlaying(false) }}>Reset</button>
+        </div>
+      ) : null}
     </div>
   )
 }

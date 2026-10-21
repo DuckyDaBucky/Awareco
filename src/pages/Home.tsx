@@ -18,7 +18,7 @@ export function HomePage() {
           <p className="muted">Your guide</p>
           <h2 style={{ marginTop: 0 }}>{handoff.app.guide_name}</h2>
           <p>{home.guide_intro}</p>
-          <Conversation surface="guide" questionIds={handoff.conversations.default_guide_question_ids} />
+          <Conversation surface="guide" questionIds={["guide_people", "guide_match", "guide_car"]} />
         </section>
         <Link className="panel entry car-entry" to="/car">
           <p className="muted">Engineering</p>

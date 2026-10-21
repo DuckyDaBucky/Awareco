@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
 import { CarStage, ComponentPanel } from "../components/CarStage.tsx"
 import { MetricCard } from "../components/Chrome.tsx"
@@ -22,7 +23,7 @@ export function CarPage() {
       <p className="muted">The car · component explorer</p>
       <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
         <h1 style={{ marginTop: 0 }}>Tap a part. See its story.</h1>
-        <Link className="btn" to="/car/evolution">Explore generations</Link>
+        <Link className="btn sleek" to="/car/evolution">Explore generations</Link>
       </div>
       <div className={component ? "car-layout" : undefined}>
         <CarStage components={components} activeId={component?.id} focusHotspot={params.get("spot") ?? undefined} />
@@ -38,84 +39,183 @@ export function CarPage() {
   )
 }
 
-const eraStops = [
-  { id: "1959", year: 1959, title: "DBR4", body: "Aston Martin’s first Formula 1 car. Front-engined, with a 2.5-litre straight-six, raced by the works team in 1959.", metric_ids: [] as string[] },
-  { id: "1960", year: 1960, title: "DBR5", body: "The works team’s revised front-engined car for a short 1960 programme.", metric_ids: [] as string[] },
-  { id: "2021", year: 2021, title: "AMR21", body: "The modern team’s return to the championship, with a Mercedes power unit.", metric_ids: [] as string[] },
-  { id: "2022", year: 2022, title: "AMR22", body: "The first Aston Martin of the ground-effect regulations, still Mercedes-powered.", metric_ids: [] as string[] },
-  { id: "2023", year: 2023, title: "AMR23", body: "Mercedes-powered car for the 2023 championship.", metric_ids: [] as string[] },
-  { id: "2024", year: 2024, title: "AMR24", body: "Mercedes-powered car for the 2024 championship.", metric_ids: [] as string[] },
-  ...handoff.car.timeline.stops,
+type EraStop = {
+  id: string
+  year: number
+  title: string
+  body: string
+  src: string
+  credit: string
+  sourceUrl: string
+  metric_ids: string[]
+}
+
+const FIRST = 1959
+const LAST = 2026
+const GAP = { from: 1961, to: 2020 }
+
+const eraStops: EraStop[] = [
+  {
+    id: "1959",
+    year: 1959,
+    title: "DBR4",
+    body: "Aston Martin’s first Formula 1 car. Front-engined, with a 2.5-litre straight-six.",
+    src: "/assets/eras/1959-dbr4.jpg",
+    credit: "David Merrett, CC BY 2.0, via Wikimedia Commons. Goodwood Revival, 2019.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:1959_Aston_Martin_DBR4_(48953615403).jpg",
+    metric_ids: [],
+  },
+  {
+    id: "2021",
+    year: 2021,
+    title: "AMR21",
+    body: "The modern team’s return to the championship, with a Mercedes power unit.",
+    src: "/assets/eras/2021-amr21.jpg",
+    credit: "Lukas Raich, CC BY-SA 4.0, via Wikimedia Commons. Austrian Grand Prix, 2021.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2021_Nr._5_Vettel.jpg",
+    metric_ids: [],
+  },
+  {
+    id: "2022",
+    year: 2022,
+    title: "AMR22",
+    body: "The first Aston Martin of the ground-effect regulations, still Mercedes-powered.",
+    src: "/assets/eras/2022-amr22.jpg",
+    credit: "Timfilbert, CC BY-SA 4.0, via Wikimedia Commons. British Grand Prix, 2022.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:AMR22_at_the_2022_British_Grand_Prix.jpg",
+    metric_ids: [],
+  },
+  {
+    id: "2023",
+    year: 2023,
+    title: "AMR23",
+    body: "Mercedes-powered car for the 2023 championship.",
+    src: "/assets/eras/2023-amr23.jpg",
+    credit: "Lukas Raich, CC BY-SA 4.0, via Wikimedia Commons. Austrian Grand Prix, 2023.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:FIA_F1_Austria_2023_Nr._14_(1).jpg",
+    metric_ids: [],
+  },
+  {
+    id: "2024",
+    year: 2024,
+    title: "AMR24",
+    body: "Mercedes-powered car for the 2024 championship.",
+    src: "/assets/eras/2024-amr24.jpg",
+    credit: "Jen Ross, CC BY 2.0, via Wikimedia Commons. British Grand Prix, 2024.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:2024_British_Grand_Prix,_Stroll_(1).jpg",
+    metric_ids: [],
+  },
+  {
+    id: "2025",
+    year: 2025,
+    title: "AMR25",
+    body: handoff.car.timeline.stops[0].body,
+    src: "/assets/eras/2025-amr25.jpg",
+    credit: "Liauzh, CC BY-SA 4.0, via Wikimedia Commons. Japanese Grand Prix, 2025.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:2025_Japan_GP_-_Aston_Martin_-_Fernando_Alonso_-_FP1.jpg",
+    metric_ids: handoff.car.timeline.stops[0].metric_ids,
+  },
+  {
+    id: "2026",
+    year: 2026,
+    title: "AMR26",
+    body: handoff.car.timeline.stops[1].body,
+    src: "/assets/eras/2026-amr26.jpg",
+    credit: "CC BY 4.0, via Wikimedia Commons. Belgian Grand Prix, 2026.",
+    sourceUrl: "https://commons.wikimedia.org/wiki/File:F1_2026,_Aston_Martin_F1_Team,_Aston_Martin_AMR26,_Fernando_Alonso,_Spa_Francorchamps_(55425688703).jpg",
+    metric_ids: handoff.car.timeline.stops[1].metric_ids,
+  },
 ]
 
+function nearestStop(year: number) {
+  return eraStops.reduce((best, stop) =>
+    Math.abs(stop.year - year) < Math.abs(best.year - year) ? stop : best,
+  )
+}
+
 export function EvolutionPage() {
-  const stops = eraStops
   const replace = useDemo((store) => store.replace)
+  const reduced = useDemo((store) => store.state.reducedMotion)
   const generation = useDemo((store) => store.state.generation)
-  const index = Math.max(0, stops.findIndex((stop) => stop.id === generation))
-  const stop = stops[index] ?? stops[0]
+  const stored = eraStops.find((stop) => stop.id === generation) ?? eraStops[eraStops.length - 1]
+  const [year, setYear] = useState(stored.year)
+  const [shownId, setShownId] = useState(stored.id)
+  const [previousId, setPreviousId] = useState(stored.id)
+  const shown = eraStops.find((stop) => stop.id === shownId) ?? stored
+  const previous = eraStops.find((stop) => stop.id === previousId) ?? shown
+  const inGap = year >= GAP.from && year <= GAP.to
   const navigate = useNavigate()
-  const select = (id: string) => replace((current) => ({ ...current, generation: id }))
-  const historic = Number(stop.year) < 2021
+
+  useEffect(() => {
+    const next = nearestStop(year)
+    if (next.id === shownId) return
+    setPreviousId(shownId)
+    setShownId(next.id)
+  }, [year, shownId])
+
+  useEffect(() => {
+    const index = eraStops.findIndex((stop) => stop.id === shown.id)
+    for (const neighbour of [eraStops[index - 1], eraStops[index + 1]]) {
+      if (!neighbour) continue
+      const image = new Image()
+      image.src = neighbour.src
+    }
+  }, [shown.id])
+
+  const commit = (nextYear: number) => {
+    const next = nearestStop(nextYear)
+    setYear(next.year)
+    replace((current) => ({ ...current, generation: next.id }))
+  }
+
+  const gapLeft = ((GAP.from - FIRST) / (LAST - FIRST)) * 100
+  const gapWidth = ((GAP.to - GAP.from) / (LAST - FIRST)) * 100
+
   return (
     <>
       <p className="muted">The car · evolution</p>
       <h1>Scrub through the generations</h1>
-      {historic ? <FrontEnginedCar title={stop.title} /> : <img className="evo-car" src="/assets/car/car-side.jpg" alt={`${stop.title} side view`} />}
-      <label className="year-slider">
-        <span className="sr-only">Car generation, from the 1959 DBR4 to the 2026 AMR26</span>
+      <div className="evo-stage">
+        <img className={reduced ? "evo-layer" : "evo-layer evo-under"} src={previous.src} alt="" />
+        <img className="evo-layer" src={shown.src} alt={`${shown.year} ${shown.title}`} />
+      </div>
+      <div className="evo-slider">
+        <div className="evo-track" aria-hidden="true">
+          <span className="evo-gap" style={{ left: `${gapLeft}%`, width: `${gapWidth}%` }} />
+        </div>
         <input
-          className="slider"
+          className="evo-range"
           type="range"
-          min={0}
-          max={stops.length - 1}
-          value={index}
-          aria-valuetext={`${stop.year} ${stop.title}`}
-          onChange={(event) => select(stops[Number(event.target.value)].id)}
-          onKeyDown={(event) => {
-            if (event.key === "Home") {
-              event.preventDefault()
-              select(stops[0].id)
-            }
-            if (event.key === "End") {
-              event.preventDefault()
-              select(stops[stops.length - 1].id)
-            }
+          min={FIRST}
+          max={LAST}
+          step={1}
+          value={year}
+          aria-valuetext={`${shown.year} ${shown.title}`}
+          aria-label="Car year, from the 1959 DBR4 to the 2026 AMR26"
+          onChange={(event) => setYear(Number(event.target.value))}
+          onPointerUp={() => commit(year)}
+          onKeyUp={(event) => {
+            if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) commit(year)
           }}
+          onBlur={() => commit(year)}
         />
-      </label>
-      <div className="year-row">
-        {stops.map((item) => (
-          <button key={item.id} className={item.id === stop.id ? "chip active" : "chip"} type="button" onClick={() => select(item.id)}>
-            {item.year}
-          </button>
-        ))}
+        <p className="evo-year" aria-live="polite">{shown.year}</p>
       </div>
       <section className="grid-2">
         <article className="panel">
-          <h2>{stop.year} {stop.title}</h2>
-          <p>{stop.body}</p>
+          <h2>{shown.year} {shown.title}</h2>
+          <p>{shown.body}</p>
+          {inGap ? <p>No Aston Martin Formula 1 car was raced from 1961 to 2020. The photograph is the nearest car with a sourced picture.</p> : null}
+          <p className="muted">Photograph: {shown.credit} <a href={shown.sourceUrl} target="_blank" rel="noreferrer">Source</a></p>
         </article>
-        {stop.metric_ids.length > 0 ? (
+        {shown.metric_ids.length > 0 ? (
           <article className="panel">
-            <p className="lime">{stop.year} record</p>
-            {stop.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
+            <p className="lime">{shown.year} record</p>
+            {shown.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
           </article>
         ) : null}
       </section>
-      <button className="btn" type="button" style={{ marginTop: 16 }} onClick={() => navigate("/car")}>Back to the component explorer</button>
+      <button className="btn sleek" type="button" style={{ marginTop: 16 }} onClick={() => navigate("/car")}>Back to the component explorer</button>
     </>
-  )
-}
-
-function FrontEnginedCar({ title }: { title: string }) {
-  return (
-    <svg className="evo-car" viewBox="0 0 900 260" role="img" aria-label={`${title}, front-engined Formula 1 car`}>
-      <rect width="900" height="260" fill="#000" />
-      <path d="M120 168 H250 L310 120 H430 L470 168 H700 L760 140 H820 L790 190 H150 Z" fill="#0c2420" stroke="#cedc00" />
-      <circle cx="250" cy="188" r="36" fill="#111" stroke="#fff" />
-      <circle cx="680" cy="188" r="36" fill="#111" stroke="#fff" />
-      <path d="M300 150 H390" stroke="#fff" />
-    </svg>
   )
 }
