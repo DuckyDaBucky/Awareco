@@ -1,5 +1,6 @@
 import { useEffect, useId, useState, type ReactNode } from "react"
-import { Link, NavLink, useNavigate } from "react-router-dom"
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
+import { speakText, speechAvailable, stopSpeaking } from "../lib/speech.ts"
 import {
   KIND_LABEL,
   formatMetric,
@@ -20,6 +21,11 @@ export function Shell({ children }: { children: ReactNode }) {
   const [scrolled, setScrolled] = useState(false)
   const reduced = useDemo((store) => store.state.reducedMotion)
   const logo = handoff.brand.header.logo_asset
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    stopSpeaking()
+  }, [pathname])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8)
@@ -90,6 +96,9 @@ export function Shell({ children }: { children: ReactNode }) {
         </div>
       ) : null}
       <main id="main" className="page">{children}</main>
+      <footer className="site-foot">
+        <Link to="/methodology">How this demonstration works</Link>
+      </footer>
     </>
   )
 }
@@ -109,18 +118,6 @@ export function MetricCard({ id }: { id: string }) {
       <p className="muted" style={{ margin: "6px 0 0", fontSize: 13 }}>{metric.period} · {metric.scope}</p>
       {metric.note ? <p className="muted" style={{ fontSize: 13 }}>{metric.note}</p> : null}
     </article>
-  )
-}
-
-export function Portrait({ name, id }: { name: string; id: string }) {
-  const hue = [...id].reduce((sum, char) => sum + char.charCodeAt(0), 0)
-  return (
-    <svg className="portrait" viewBox="0 0 80 80" role="img" aria-label={`Illustration of ${name}, a fictional composite`}>
-      <rect width="80" height="80" fill="#00473f" />
-      <circle cx="40" cy="34" r={16 + (hue % 5)} fill="none" stroke="#cedc00" strokeWidth="2" />
-      <path d={`M18 ${58 + (hue % 6)} Q40 48 62 60`} fill="none" stroke="#ffffff" strokeWidth="2" />
-      <text x="40" y="39" textAnchor="middle" fill="#ffffff" fontSize="12" fontFamily="AstonMartinSans, sans-serif">{name.slice(0, 1)}</text>
-    </svg>
   )
 }
 
@@ -147,6 +144,7 @@ export function Conversation({
 
   const ask = (question: Question) => {
     if (pending) return
+    stopSpeaking()
     const userTurn: Turn = { id: `${question.id}:q:${turns.length}`, role: "user", text: question.question, questionId: question.id }
     replace((current) => ({
       ...current,
@@ -186,6 +184,7 @@ export function Conversation({
         {turns.map((turn) => (
           <div key={turn.id} className={turn.role === "user" ? "bubble user" : "bubble guide"}>
             <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{turn.text}</p>
+            {surface === "guide" && turn.role === "guide" ? <SpeechControl text={turn.text} /> : null}
             {turn.role === "guide" && turn.questionId ? <AnswerExtras questionId={turn.questionId} /> : null}
           </div>
         ))}
@@ -206,12 +205,35 @@ export function Conversation({
         <button
           className="btn ghost"
           type="button"
-          onClick={() => replace((current) => ({ ...current, threads: { ...current.threads, [surface]: [] } }))}
+          onClick={() => {
+            stopSpeaking()
+            replace((current) => ({ ...current, threads: { ...current.threads, [surface]: [] } }))
+          }}
         >
           Restart conversation
         </button>
       </div>
     </div>
+  )
+}
+
+function SpeechControl({ text }: { text: string }) {
+  const [playing, setPlaying] = useState(false)
+  useEffect(() => () => stopSpeaking(), [])
+  if (!speechAvailable()) return null
+  const toggle = () => {
+    if (playing) {
+      stopSpeaking()
+      setPlaying(false)
+      return
+    }
+    const started = speakText(text, () => setPlaying(false))
+    setPlaying(started)
+  }
+  return (
+    <button className="chip" type="button" onClick={toggle} aria-pressed={playing}>
+      {playing ? "Stop" : "Play answer"}
+    </button>
   )
 }
 

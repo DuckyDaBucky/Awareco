@@ -43,9 +43,9 @@
 
 :root {
   --opal: #00665e;
-  --dark: #00231f;
-  --deep: #00352f;
-  --mid: #00473f;
+  --dark: #000000;
+  --deep: #07110f;
+  --mid: #0c2420;
   --lime: #cedc00;
   --lime-hover: #b9c600;
   --ink: #ffffff;
@@ -64,7 +64,16 @@
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
-body { margin: 0; background: var(--dark); }
+body {
+  margin: 0;
+  background-color: #000;
+  background-image:
+    radial-gradient(ellipse at 18% -8%, rgba(0, 102, 94, 0.34), transparent 42%),
+    radial-gradient(ellipse at 100% 90%, rgba(0, 55, 48, 0.28), transparent 38%),
+    url("/assets/atmosphere/floor.jpg");
+  background-size: auto, auto, cover;
+  background-attachment: fixed;
+}
 button, input, select { font: inherit; color: inherit; }
 a { color: inherit; }
 img { max-width: 100%; }
@@ -240,8 +249,20 @@ p { line-height: 1.5; }
   min-height: 420px;
   text-decoration: none;
   background:
-    linear-gradient(#00231fcc, #00231f),
+    linear-gradient(#000000d0, #000000b8),
     var(--mid);
+  background-size: cover;
+  background-position: center;
+}
+.people-entry {
+  background-image:
+    linear-gradient(#000000c4, #000000e6),
+    url("/assets/atmosphere/people.jpg");
+}
+.car-entry {
+  background-image:
+    linear-gradient(#00000088, #000000e0),
+    url("/assets/car/car-side.jpg");
 }
 .entry h2 { margin: 0 0 8px; font-size: 40px; }
 .metric-strip {
@@ -259,15 +280,14 @@ p { line-height: 1.5; }
 .source-list button { background: none; border: 0; color: var(--lime); cursor: pointer; padding: 0; text-decoration: underline; }
 
 .car-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr); gap: 18px; }
-.car-stage {
-  position: relative;
-  background: #000;
-  border-radius: var(--radius);
-  min-height: 640px;
-  background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-  background-size: 40px 40px;
-}
-.car-stage svg.car { width: 100%; height: auto; display: block; }
+.car-stage { background: transparent; }
+.car-frame { position: relative; width: min(520px, 100%); margin: 0 auto; }
+.car-photo, .evo-car { width: 100%; height: auto; display: block; }
+.evo-car { border-radius: var(--radius); background: #000; }
+.car-caption { margin-top: 10px; }
+.guide-note { color: var(--muted); font-size: 14px; }
+.site-foot { padding: 8px var(--gutter) 28px; color: var(--muted); font-size: 13px; }
+.site-foot a { color: var(--muted); }
 .hotspot {
   position: absolute;
   width: 44px;
@@ -301,7 +321,7 @@ p { line-height: 1.5; }
 }
 .hotspot:hover em, .hotspot:focus-visible em, .hotspot.active em { opacity: 1; }
 .part-visual { min-height: 180px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; position: relative; overflow: hidden; }
-.part-visual.xray { background: repeating-linear-gradient(135deg, #00352f, #00352f 8px, #00231f 8px, #00231f 16px); }
+.part-visual.xray { background: repeating-linear-gradient(135deg, #0c2420, #0c2420 8px, #000 8px, #000 16px); }
 .flow { height: 8px; background: var(--mid); border-radius: 99px; overflow: hidden; margin-top: 24px; }
 .flow span { display: block; height: 100%; width: 40%; background: var(--lime); animation: flow 1.6s linear infinite; }
 @keyframes flow { from { transform: translateX(-120%); } to { transform: translateX(280%); } }
@@ -311,7 +331,7 @@ p { line-height: 1.5; }
 .people-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .person-card { text-decoration: none; display: block; }
 .persona-layout { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
-.portrait { width: 72px; height: 72px; border-radius: 50%; background: var(--mid); }
+.portrait { width: 100%; max-width: 180px; height: auto; display: block; border-radius: 12px; background: #000; }
 
 .partner-shell { display: grid; grid-template-columns: 220px 1fr; gap: 18px; }
 .partner-nav { display: flex; flex-direction: column; gap: 6px; }

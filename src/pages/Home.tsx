@@ -6,14 +6,13 @@ export function HomePage() {
   const home = handoff.app.home
   return (
     <>
-      <p className="notice">{handoff.app.global_notice}</p>
       <h1 className="flare" style={{ fontSize: "clamp(48px, 7vw, 84px)", margin: "0 0 8px" }}>{home.headline}</h1>
       <p style={{ maxWidth: 640, fontSize: 20 }}>{home.description}</p>
       <div className="home-grid">
-        <Link className="panel entry" to="/people">
+        <Link className="panel entry people-entry" to="/people">
           <p className="muted">Community and inclusion</p>
           <h2>The People</h2>
-          <p>12 composite guides to real programmes.</p>
+          <p>Twelve stories from the programmes behind the team.</p>
         </Link>
         <section className="panel">
           <p className="muted">Your guide</p>
@@ -21,7 +20,7 @@ export function HomePage() {
           <p>{home.guide_intro}</p>
           <Conversation surface="guide" questionIds={handoff.conversations.default_guide_question_ids} />
         </section>
-        <Link className="panel entry" to="/car">
+        <Link className="panel entry car-entry" to="/car">
           <p className="muted">Engineering</p>
           <h2>The Car</h2>
           <p>Take it apart. See how every part is explained.</p>

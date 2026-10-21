@@ -1,5 +1,6 @@
 import { create } from "zustand"
 import { handoff, roleForProgramme } from "./content.ts"
+import { stopSpeaking } from "./speech.ts"
 
 export type Turn = {
   id: string
@@ -112,6 +113,7 @@ export const useDemo = create<Store>((set, get) => ({
     }
   },
   reset: () => {
+    stopSpeaking()
     const fresh = initialState()
     set({ state: fresh })
     try {

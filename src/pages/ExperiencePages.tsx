@@ -349,7 +349,7 @@ export function MethodologyPage() {
   return (
     <>
       <h1>Sources and assumptions</h1>
-      <p>{handoff.app.global_notice}</p>
+      <p>Prepared answers are stored with this demonstration. Simulated weekends, illustrative guides, and scenario estimates are labelled on the screens where they appear.</p>
       <ul>
         {handoff.sources.map((source) => (
           <li key={source.id}>

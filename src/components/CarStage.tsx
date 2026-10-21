@@ -16,56 +16,61 @@ export function CarStage({
 }) {
   const navigate = useNavigate()
   const spots = components.flatMap((component) =>
-    component.hotspots.map((hotspot) => ({ ...hotspot, componentId: component.id, label: component.label })),
+    component.hotspots.map((hotspot) => {
+      const placed = calibrated[hotspot.id] ?? { x: hotspot.x, y: hotspot.y }
+      return { ...hotspot, ...placed, componentId: component.id, label: component.label }
+    }),
   )
   return (
-    <div
-      className="car-stage"
-      onDoubleClick={(event) => {
-        const target = event.target as HTMLElement
-        if (target.closest(".hotspot")) return
-        navigate("/car/evolution")
-      }}
-    >
-      <Diagram />
-      {spots.map((spot) => (
-        <button
-          key={spot.id}
-          className={activeId === spot.componentId && (!focusHotspot || focusHotspot === spot.id) ? "hotspot active" : "hotspot"}
-          style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%` }}
-          type="button"
-          aria-label={spot.label}
-          aria-pressed={activeId === spot.componentId}
-          onClick={() => navigate(`/car/${spot.componentId}?spot=${spot.id}`)}
-        >
-          <i />
-          <em>{spot.label}</em>
-        </button>
-      ))}
-      <p className="muted" style={{ position: "absolute", left: 16, bottom: 12, margin: 0 }}>
-        Explanatory diagram, not a photograph of the AMR26. Select a square to explore a component.
-      </p>
+    <div className="car-stage">
+      <div
+        className="car-frame"
+        onDoubleClick={(event) => {
+          const target = event.target as HTMLElement
+          if (target.closest(".hotspot")) return
+          navigate("/car/evolution")
+        }}
+      >
+        <img className="car-photo" src="/assets/car/car-top.jpg" alt="Top view of a Formula One car used as the explorer" />
+        {spots.map((spot) => (
+          <button
+            key={spot.id}
+            id={`hotspot-${spot.id}`}
+            className={activeId === spot.componentId && (!focusHotspot || focusHotspot === spot.id) ? "hotspot active" : "hotspot"}
+            style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%` }}
+            type="button"
+            aria-label={spot.label}
+            aria-pressed={activeId === spot.componentId}
+            onClick={() => navigate(`/car/${spot.componentId}?spot=${spot.id}`)}
+          >
+            <i />
+            <em>{spot.label}</em>
+          </button>
+        ))}
+      </div>
+      <p className="muted car-caption">Select a square. Internal parts are explained in the panel. They are not visible through the bodywork.</p>
     </div>
   )
 }
 
-function Diagram() {
-  return (
-    <svg className="car" viewBox="0 0 400 760" role="img" aria-label="Top view explanatory diagram of a Formula One car">
-      <rect width="400" height="760" fill="#000" />
-      <ellipse cx="70" cy="180" rx="38" ry="58" fill="#111" stroke="#cedc00" />
-      <ellipse cx="330" cy="180" rx="38" ry="58" fill="#111" stroke="#cedc00" />
-      <ellipse cx="70" cy="560" rx="42" ry="64" fill="#111" stroke="#cedc00" />
-      <ellipse cx="330" cy="560" rx="42" ry="64" fill="#111" stroke="#cedc00" />
-      <path d="M120 70 H280 L300 120 H100 Z" fill="#00665e" stroke="#fff" />
-      <path d="M150 120 C150 200 145 250 160 320 H240 C255 250 250 200 250 120 Z" fill="#00352f" stroke="#fff" />
-      <circle cx="200" cy="250" r="28" fill="#00231f" stroke="#cedc00" />
-      <path d="M155 320 H245 L260 470 H140 Z" fill="#00473f" stroke="#fff" />
-      <path d="M145 470 H255 L270 620 H130 Z" fill="#00665e" stroke="#fff" />
-      <path d="M110 640 H290 L270 700 H130 Z" fill="#00665e" stroke="#fff" />
-      <path d="M168 360 H232 V520 H168 Z" fill="#cedc0022" stroke="#cedc00" strokeDasharray="4 3" />
-    </svg>
-  )
+const calibrated: Record<string, { x: number; y: number }> = {
+  active_aero_0: { x: 0.5, y: 0.125 },
+  tires_0: { x: 0.342, y: 0.238 },
+  tires_1: { x: 0.658, y: 0.238 },
+  brakes_0: { x: 0.4, y: 0.25 },
+  suspension_0: { x: 0.42, y: 0.3 },
+  chassis_0: { x: 0.5, y: 0.402 },
+  fuel_system_0: { x: 0.5, y: 0.47 },
+  cooling_0: { x: 0.61, y: 0.546 },
+  energy_recovery_0: { x: 0.44, y: 0.56 },
+  power_unit_0: { x: 0.5, y: 0.64 },
+  floor_diffuser_0: { x: 0.5, y: 0.82 },
+  suspension_1: { x: 0.6, y: 0.72 },
+  gearbox_0: { x: 0.5, y: 0.73 },
+  brakes_1: { x: 0.4, y: 0.76 },
+  tires_2: { x: 0.341, y: 0.762 },
+  tires_3: { x: 0.657, y: 0.762 },
+  active_aero_1: { x: 0.5, y: 0.876 },
 }
 
 export function ComponentPanel({ component, spot }: { component: ComponentRecord; spot?: string }) {
@@ -73,7 +78,11 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
   const replace = useDemo((store) => store.replace)
   const navigate = useNavigate()
   const variant = component.variants.find((item) => item.id === generation) ?? component.variants[1]
-  const close = () => navigate("/car")
+  const close = () => {
+    const focusId = spot ? `hotspot-${spot}` : `hotspot-${component.hotspots[0]?.id ?? ""}`
+    navigate("/car")
+    window.setTimeout(() => document.getElementById(focusId)?.focus(), 0)
+  }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -178,19 +187,4 @@ function caption(animation: string, state?: string) {
   if (animation === "wheel_rotation") return "Wheel detail for the 18-inch regulation."
   if (animation === "hybrid_energy_flow") return "Combustion and electrical paths share the power unit."
   return handoff.car.interaction.panel_layout
-}
-
-export function SideProfile({ year }: { year: string }) {
-  const dim = year === "2025"
-  return (
-    <svg viewBox="0 0 900 260" role="img" aria-label={`${year} side-profile explanatory diagram`}>
-      <rect width="900" height="260" fill="#000" />
-      <path d="M80 150 H760 L700 190 H140 Z" fill={dim ? "#00352f" : "#00665e"} stroke="#fff" />
-      <path d="M150 150 L230 90 H360 L300 150 Z" fill="#00473f" stroke="#fff" />
-      <circle cx="230" cy="190" r="42" fill="#111" stroke="#cedc00" />
-      <circle cx="640" cy="190" r="42" fill="#111" stroke="#cedc00" />
-      <path d="M80 130 H200" stroke="#cedc00" />
-      <path d="M700 120 H820" stroke="#cedc00" />
-    </svg>
-  )
 }

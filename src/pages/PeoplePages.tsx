@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { Conversation, Portrait, SourceDrawer } from "../components/Chrome.tsx"
+import { Conversation, MetricCard, SourceDrawer } from "../components/Chrome.tsx"
+import { Portrait } from "../components/Portraits.tsx"
 import { getPersona, getSource, listPersonas } from "../lib/content.ts"
 import { matchPersonas } from "../lib/logic.ts"
 import { handoff } from "../lib/content.ts"
 import { useDemo } from "../lib/store.ts"
-import { MetricCard } from "../components/Chrome.tsx"
 
 export function PeoplePage() {
   const [filter, setFilter] = useState<"ALL" | "BELONG" | "COMMUNITY">("ALL")
@@ -14,7 +14,6 @@ export function PeoplePage() {
     <>
       <p className="muted">The people</p>
       <h1>Meet the minds behind the machine.</h1>
-      <p>These are fictional guides to real programmes. They are not employees, and a partner has not approved their dialogue.</p>
       <div className="chips" style={{ marginBottom: 16 }}>
         {(["ALL", "BELONG", "COMMUNITY"] as const).map((item) => (
           <button key={item} className={filter === item ? "chip active" : "chip"} type="button" onClick={() => setFilter(item)}>
@@ -27,7 +26,7 @@ export function PeoplePage() {
           <Link key={person.id} className="panel person-card" to={`/people/${person.id}`}>
             <Portrait name={person.name} id={person.id} />
             <h2>{person.name}</h2>
-            <p className="muted">Demonstration composite</p>
+            <p className="muted">Illustrative guide</p>
             <p>{person.role}</p>
             <p>{person.programme_name}</p>
           </Link>
@@ -62,7 +61,8 @@ export function PersonaPage() {
           <Portrait name={person.name} id={person.id} />
           <h2>{person.name}</h2>
           <p>{person.role}</p>
-          <p className="lime">Demonstration composite · not partner-approved</p>
+          <p className="muted">Illustrative guide</p>
+          <p className="guide-note">{person.name} is an illustrative guide to {person.programme_name}. The programme and the cited figures come from the published report. The name and portrait were created for this demonstration.</p>
           <Conversation surface={`person:${person.id}`} questionIds={person.question_ids} intro={person.intro} />
         </section>
         <section className="panel">

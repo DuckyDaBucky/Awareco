@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { CarStage, ComponentPanel, SideProfile } from "../components/CarStage.tsx"
+import { CarStage, ComponentPanel } from "../components/CarStage.tsx"
 import { MetricCard } from "../components/Chrome.tsx"
 import { getComponent, handoff, listComponents } from "../lib/content.ts"
 import { useDemo } from "../lib/store.ts"
@@ -50,7 +50,7 @@ export function EvolutionPage() {
     <>
       <p className="muted">The car · evolution</p>
       <h1>Scrub the loaded generations</h1>
-      <SideProfile year={stop.id} />
+      <img className="evo-car" src="/assets/car/car-side.jpg" alt={`${stop.title} side view`} />
       <div
         className="timeline"
         role="slider"
