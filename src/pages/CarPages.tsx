@@ -21,8 +21,8 @@ export function CarPage() {
   return (
     <>
       <p className="muted">The car · component explorer</p>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-        <h1 style={{ marginTop: 0 }}>Tap a part. See its story.</h1>
+      <div className="car-heading">
+        <h1>Tap a part. See its story.</h1>
         <Link className="btn sleek" to="/car/evolution">Explore generations</Link>
       </div>
       <div className={component ? "car-layout" : undefined}>
@@ -211,26 +211,28 @@ export function EvolutionPage() {
         />
         <div className="evo-ticks" aria-hidden="true">
           {eraStops.map((stop, index) => (
-            <span key={stop.id} style={{ left: `${(index / max) * 100}%` }}>{stop.year}</span>
+            <span key={stop.id} className={stop.id === shown.id ? "is-current" : undefined} style={{ left: `${(index / max) * 100}%` }}>{stop.year}</span>
           ))}
         </div>
-        <p className="evo-year" aria-live="polite">{shown.year} {shown.title}</p>
       </div>
-      <section className="grid-2">
-        <article className="panel">
-          <h2>{shown.year} {shown.title}</h2>
+      <section className={shown.metric_ids.length > 0 ? "evo-record" : "evo-record solo"} aria-live="polite">
+        <article className="panel evo-copy">
+          <p className="evo-kicker">{shown.year}</p>
+          <h2>{shown.title}</h2>
           <p>{shown.body}</p>
-          {crossingGap ? <p>No Aston Martin Formula 1 car was raced from 1961 to 2020.</p> : null}
-          <p className="muted">Photograph: {shown.credit} <a href={shown.sourceUrl} target="_blank" rel="noreferrer">Source</a></p>
+          {crossingGap ? <p className="evo-gap-note">No Aston Martin Formula 1 car was raced from 1961 to 2020.</p> : null}
+          <p className="evo-credit">Photograph · {shown.credit} <a href={shown.sourceUrl} target="_blank" rel="noreferrer">Source</a></p>
         </article>
         {shown.metric_ids.length > 0 ? (
-          <article className="panel">
-            <p className="lime">{shown.year} record</p>
-            {shown.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
+          <article className="panel evo-metrics">
+            <p className="evo-kicker">{shown.year} record</p>
+            <div className="evo-metric-list">
+              {shown.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
+            </div>
           </article>
         ) : null}
       </section>
-      <button className="btn sleek" type="button" style={{ marginTop: 16 }} onClick={() => navigate("/car")}>Back to the component explorer</button>
+      <button className="btn sleek" type="button" onClick={() => navigate("/car")}>Back to the component explorer</button>
     </>
   )
 }

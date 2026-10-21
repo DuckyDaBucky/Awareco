@@ -202,12 +202,19 @@ p { line-height: 1.5; }
 }
 .lime { color: var(--lime); }
 .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   border: 0;
   background: var(--lime);
   color: #111;
-  border-radius: 16px;
+  border-radius: 999px;
   padding: 10px 16px;
   font-family: AstonMartinFlare, sans-serif;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
   cursor: pointer;
 }
 .btn:hover { background: var(--lime-hover); }
@@ -215,11 +222,21 @@ p { line-height: 1.5; }
   background: transparent;
   color: var(--lime);
   border: 1px solid var(--lime);
-  padding: 8px 14px;
+  padding: 10px 18px;
   font-size: 14px;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
 }
-.btn.sleek:hover { background: transparent; border-color: var(--lime-hover); color: var(--lime-hover); }
+.btn.sleek::after { content: "→"; font-size: 15px; }
+.btn.sleek:hover { background: #cedc0014; border-color: var(--lime-hover); color: var(--lime-hover); }
+.car-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.car-heading h1 { margin: 0; }
 .btn.ghost {
   background: transparent;
   color: white;
@@ -387,17 +404,31 @@ p { line-height: 1.5; }
 .evo-layer { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; }
 .evo-top { animation: evo-in 280ms ease; }
 @keyframes evo-in { from { opacity: 0; } to { opacity: 1; } }
-.evo-slider { position: relative; margin-top: 18px; height: 36px; }
+.evo-slider { position: relative; margin: 20px 0 22px; height: 64px; }
 .evo-track { position: absolute; left: 0; right: 0; top: 14px; height: 8px; border-radius: 99px; background: #ffffff22; }
 .evo-gap { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(90deg, #ffffff33 0 4px, transparent 4px 10px); }
 .evo-range { position: relative; z-index: 1; width: 100%; height: 36px; margin: 0; background: transparent; appearance: none; }
 .evo-range::-webkit-slider-runnable-track { height: 8px; background: transparent; }
-.evo-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -5px; border-radius: 50%; background: var(--lime); }
+.evo-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -5px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px #000; }
 .evo-range::-moz-range-track { height: 8px; background: transparent; }
 .evo-range::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--lime); }
-.evo-year { margin: 28px 0 0; font-family: AstonMartinFlare, sans-serif; font-size: 28px; }
-.evo-ticks { position: relative; height: 22px; margin-top: 4px; }
-.evo-ticks span { position: absolute; transform: translateX(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.evo-ticks { position: absolute; left: 0; right: 0; top: 42px; height: 18px; }
+.evo-ticks span { position: absolute; transform: translateX(-50%); font-size: 12px; letter-spacing: 0.04em; color: var(--muted); white-space: nowrap; }
+.evo-ticks span:first-child { transform: translateX(0); }
+.evo-ticks span:last-child { transform: translateX(-100%); }
+.evo-ticks span.is-current { color: var(--lime); }
+.evo-record { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: 16px; align-items: stretch; }
+.evo-record.solo { grid-template-columns: minmax(0, 720px); }
+.evo-copy h2 { margin: 0 0 12px; font-size: clamp(32px, 4vw, 48px); line-height: 0.95; }
+.evo-kicker { margin: 0 0 10px; color: var(--lime); font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; }
+.evo-copy p { margin: 0 0 12px; max-width: 62ch; }
+.evo-gap-note { color: var(--muted); }
+.evo-credit { margin-top: 8px; color: var(--muted); font-size: 13px; }
+.evo-credit a { color: var(--lime); text-decoration: none; border-bottom: 1px solid #cedc0066; }
+.evo-metric-list article { padding: 16px 0; border-top: 1px solid var(--line); }
+.evo-metric-list article:first-child { border-top: 0; padding-top: 2px; }
+.evo-metric-list strong { display: block; margin: 4px 0; font-family: AstonMartinFlare, sans-serif; font-size: 28px; font-weight: 500; line-height: 1; }
+.evo-record + .btn { margin-top: 18px; }
 html.reduced .evo-top { animation: none; }
 
 .partner-shell { display: grid; grid-template-columns: 220px 1fr; gap: 18px; }
@@ -463,7 +494,7 @@ html.reduced .evo-top { animation: none; }
 }
 
 @media (max-width: 980px) {
-  .home-grid, .car-layout, .persona-layout, .people-grid, .partner-shell, .metric-strip, .grid-2 {
+  .home-grid, .car-layout, .persona-layout, .people-grid, .partner-shell, .metric-strip, .grid-2, .evo-record, .evo-record.solo {
     grid-template-columns: 1fr;
   }
   .entry { min-height: 420px; }
