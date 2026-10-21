@@ -24,7 +24,7 @@ export type DemoState = {
   version: 1
   roleId: string
   programmeId: string
-  generation: "2025" | "2026"
+  generation: string
   threads: Record<string, Turn[]>
   matchAnswers: Record<string, string | null>
   savedScenarios: { id: string; scenarioId: string; inputs: Record<string, number>; at: string }[]

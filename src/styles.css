@@ -343,6 +343,8 @@ p { line-height: 1.5; }
 .bar-row i { display: block; height: 8px; background: var(--lime); border-radius: 99px; }
 
 .slider { width: 100%; accent-color: var(--lime); }
+.year-slider { display: block; margin-top: 18px; }
+.year-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; }
 .timeline { position: relative; height: 8px; background: #ffffff22; border-radius: 99px; margin: 28px 0 48px; }
 .timeline button.stop {
   position: absolute;

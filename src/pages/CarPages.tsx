@@ -38,60 +38,84 @@ export function CarPage() {
   )
 }
 
+const eraStops = [
+  { id: "1959", year: 1959, title: "DBR4", body: "Aston Martin’s first Formula 1 car. Front-engined, with a 2.5-litre straight-six, raced by the works team in 1959.", metric_ids: [] as string[] },
+  { id: "1960", year: 1960, title: "DBR5", body: "The works team’s revised front-engined car for a short 1960 programme.", metric_ids: [] as string[] },
+  { id: "2021", year: 2021, title: "AMR21", body: "The modern team’s return to the championship, with a Mercedes power unit.", metric_ids: [] as string[] },
+  { id: "2022", year: 2022, title: "AMR22", body: "The first Aston Martin of the ground-effect regulations, still Mercedes-powered.", metric_ids: [] as string[] },
+  { id: "2023", year: 2023, title: "AMR23", body: "Mercedes-powered car for the 2023 championship.", metric_ids: [] as string[] },
+  { id: "2024", year: 2024, title: "AMR24", body: "Mercedes-powered car for the 2024 championship.", metric_ids: [] as string[] },
+  ...handoff.car.timeline.stops,
+]
+
 export function EvolutionPage() {
-  const stops = handoff.car.timeline.stops
+  const stops = eraStops
   const replace = useDemo((store) => store.replace)
   const generation = useDemo((store) => store.state.generation)
   const index = Math.max(0, stops.findIndex((stop) => stop.id === generation))
   const stop = stops[index] ?? stops[0]
   const navigate = useNavigate()
-  const select = (id: string) => replace((current) => ({ ...current, generation: id as "2025" | "2026" }))
+  const select = (id: string) => replace((current) => ({ ...current, generation: id }))
+  const historic = Number(stop.year) < 2021
   return (
     <>
       <p className="muted">The car · evolution</p>
-      <h1>Scrub the loaded generations</h1>
-      <img className="evo-car" src="/assets/car/car-side.jpg" alt={`${stop.title} side view`} />
-      <div
-        className="timeline"
-        role="slider"
-        tabIndex={0}
-        aria-valuemin={0}
-        aria-valuemax={stops.length - 1}
-        aria-valuenow={index}
-        aria-label="Car generation"
-        onKeyDown={(event) => {
-          if (event.key === "ArrowRight") select(stops[Math.min(stops.length - 1, index + 1)].id)
-          if (event.key === "ArrowLeft") select(stops[Math.max(0, index - 1)].id)
-          if (event.key === "Home") select(stops[0].id)
-          if (event.key === "End") select(stops[stops.length - 1].id)
-        }}
-      >
-        {stops.map((item, itemIndex) => (
-          <button
-            key={item.id}
-            className={item.id === stop.id ? "stop active" : "stop"}
-            style={{ left: `${(itemIndex / Math.max(1, stops.length - 1)) * 100}%` }}
-            type="button"
-            onClick={() => select(item.id)}
-          >
-            <i />
-            <small>{item.year}<br />{item.title}</small>
+      <h1>Scrub through the generations</h1>
+      {historic ? <FrontEnginedCar title={stop.title} /> : <img className="evo-car" src="/assets/car/car-side.jpg" alt={`${stop.title} side view`} />}
+      <label className="year-slider">
+        <span className="sr-only">Car generation, from the 1959 DBR4 to the 2026 AMR26</span>
+        <input
+          className="slider"
+          type="range"
+          min={0}
+          max={stops.length - 1}
+          value={index}
+          aria-valuetext={`${stop.year} ${stop.title}`}
+          onChange={(event) => select(stops[Number(event.target.value)].id)}
+          onKeyDown={(event) => {
+            if (event.key === "Home") {
+              event.preventDefault()
+              select(stops[0].id)
+            }
+            if (event.key === "End") {
+              event.preventDefault()
+              select(stops[stops.length - 1].id)
+            }
+          }}
+        />
+      </label>
+      <div className="year-row">
+        {stops.map((item) => (
+          <button key={item.id} className={item.id === stop.id ? "chip active" : "chip"} type="button" onClick={() => select(item.id)}>
+            {item.year}
           </button>
         ))}
       </div>
       <section className="grid-2">
         <article className="panel">
-          <h2>{stop.title}</h2>
+          <h2>{stop.year} {stop.title}</h2>
           <p>{stop.body}</p>
-          <p className="muted">{handoff.car.timeline.historical_expansion.rule}</p>
         </article>
-        <article className="panel">
-          <p className="lime">Team-impact milestone</p>
-          <h2>{stop.id === "2025" ? "Sustainable aviation fuel certificates" : "2026 technical framework"}</h2>
-          {stop.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
-        </article>
+        {stop.metric_ids.length > 0 ? (
+          <article className="panel">
+            <p className="lime">{stop.year} record</p>
+            {stop.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
+          </article>
+        ) : null}
       </section>
       <button className="btn" type="button" style={{ marginTop: 16 }} onClick={() => navigate("/car")}>Back to the component explorer</button>
     </>
+  )
+}
+
+function FrontEnginedCar({ title }: { title: string }) {
+  return (
+    <svg className="evo-car" viewBox="0 0 900 260" role="img" aria-label={`${title}, front-engined Formula 1 car`}>
+      <rect width="900" height="260" fill="#000" />
+      <path d="M120 168 H250 L310 120 H430 L470 168 H700 L760 140 H820 L790 190 H150 Z" fill="#0c2420" stroke="#cedc00" />
+      <circle cx="250" cy="188" r="36" fill="#111" stroke="#fff" />
+      <circle cx="680" cy="188" r="36" fill="#111" stroke="#fff" />
+      <path d="M300 150 H390" stroke="#fff" />
+    </svg>
   )
 }

@@ -16,10 +16,12 @@ export function CarStage({
 }) {
   const navigate = useNavigate()
   const spots = components.flatMap((component) =>
-    component.hotspots.map((hotspot) => {
-      const placed = calibrated[hotspot.id] ?? { x: hotspot.x, y: hotspot.y }
-      return { ...hotspot, ...placed, componentId: component.id, label: component.label }
-    }),
+    component.hotspots
+      .filter((hotspot) => component.id !== "tires" || hotspot.id === "tires_0")
+      .map((hotspot) => {
+        const placed = calibrated[hotspot.id] ?? { x: hotspot.x, y: hotspot.y }
+        return { ...hotspot, ...placed, componentId: component.id, label: component.label }
+      }),
   )
   return (
     <div className="car-stage">
@@ -48,7 +50,7 @@ export function CarStage({
           </button>
         ))}
       </div>
-      <p className="muted car-caption">Select a square. Internal parts are explained in the panel. They are not visible through the bodywork.</p>
+      <p className="muted car-caption">Select a square to explore a component.</p>
     </div>
   )
 }
@@ -77,7 +79,8 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
   const generation = useDemo((store) => store.state.generation)
   const replace = useDemo((store) => store.replace)
   const navigate = useNavigate()
-  const variant = component.variants.find((item) => item.id === generation) ?? component.variants[1]
+  const season = generation === "2025" ? "2025" : "2026"
+  const variant = component.variants.find((item) => item.id === season) ?? component.variants[1]
   const close = () => {
     const focusId = spot ? `hotspot-${spot}` : `hotspot-${component.hotspots[0]?.id ?? ""}`
     navigate("/car")
@@ -100,7 +103,7 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
       </div>
       <div className="chips" style={{ marginBottom: 12 }}>
         {(["2025", "2026"] as const).map((year) => (
-          <button key={year} className={generation === year ? "chip active" : "chip"} type="button" onClick={() => replace((current) => ({ ...current, generation: year }))}>
+          <button key={year} className={season === year ? "chip active" : "chip"} type="button" onClick={() => replace((current) => ({ ...current, generation: year }))}>
             {year} {year === "2025" ? "AMR25" : "AMR26"}
           </button>
         ))}
@@ -109,9 +112,8 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
         <div>
           <p>{variant?.description}</p>
           {variant?.sustainability_connection ? <p>{variant.sustainability_connection}</p> : null}
-          <p className="muted">{component.bridge.relationship}</p>
         </div>
-        <PartVisual animation={component.animation} states={component.animation_controls.states} xray={component.animation === "fuel_flow" || component.id === "energy_recovery" || component.id === "power_unit"} spot={spot} />
+        <PartVisual animation={component.animation} states={component.animation_controls.states} xray={component.animation === "fuel_flow" || component.id === "energy_recovery" || component.id === "power_unit"} />
       </div>
       <div className="grid-2" style={{ marginTop: 12 }}>
         {(variant?.metric_ids.length ? variant.metric_ids : component.metric_ids).map((id) => (
@@ -147,7 +149,7 @@ function PowerCompare() {
   )
 }
 
-function PartVisual({ animation, states, xray, spot }: { animation: string; states?: string[]; xray: boolean; spot?: string }) {
+function PartVisual({ animation, states, xray }: { animation: string; states?: string[]; xray: boolean }) {
   const reduced = useDemo((store) => store.state.reducedMotion)
   const [playing, setPlaying] = useState(true)
   const [index, setIndex] = useState(0)
@@ -159,7 +161,6 @@ function PartVisual({ animation, states, xray, spot }: { animation: string; stat
   const state = states?.[index]
   return (
     <div className={xray ? "part-visual xray" : "part-visual"} aria-label="Explanatory illustration">
-      <p className="muted" style={{ marginTop: 0 }}>Explanatory illustration{spot ? ` · focus ${spot}` : ""}. Not telemetry.</p>
       {animation === "wing_mode_toggle" ? <div className={state === "Straight Mode" ? "wing straight" : "wing"} /> : null}
       {animation === "gear_selector" ? <p className="flare" style={{ fontSize: 42, margin: 0 }}>{state ?? "8"}</p> : null}
       {animation === "recover_store_deploy" ? <p className="flare">{state ?? "Recover"}</p> : null}
