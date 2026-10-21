@@ -1,4 +1,4 @@
-import { useEffect, useId, useState, type ReactNode } from "react"
+import { useEffect, useId, useRef, useState, type ReactNode } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
 import { speakGuide, speechAvailable, stopSpeaking } from "../lib/speech.ts"
 import {
@@ -137,12 +137,31 @@ export function Conversation({
   const replace = useDemo((store) => store.replace)
   const turns = threads[surface] ?? []
   const [pending, setPending] = useState<number | null>(null)
+  const logRef = useRef<HTMLDivElement>(null)
+  const seenTurns = useRef(turns.length)
 
   useEffect(() => {
     return () => {
       if (pending) window.clearTimeout(pending)
     }
   }, [pending])
+
+  useEffect(() => {
+    const latest = turns[turns.length - 1]
+    if (turns.length <= seenTurns.current || latest?.role !== "guide") {
+      seenTurns.current = turns.length
+      return
+    }
+    seenTurns.current = turns.length
+    const last = logRef.current?.querySelector(".bubble.guide:last-child")
+    if (!(last instanceof HTMLElement)) return
+    const rect = last.getBoundingClientRect()
+    const limit = window.innerHeight - 48
+    if (rect.bottom > limit) {
+      const top = window.scrollY + rect.bottom - limit
+      window.scrollTo({ top, behavior: skip ? "auto" : "smooth" })
+    }
+  }, [turns, skip])
 
   const ask = (question: Question) => {
     if (pending) return
@@ -199,7 +218,21 @@ export function Conversation({
         </div>
       ) : null}
       {intro && turns.length === 0 ? <p className="chat-intro">{intro}</p> : null}
-      <div className="talk-log" aria-live="polite">
+      {guide && remaining.length > 0 ? (
+        <div className="ask-list" role="group" aria-label={turns.length ? "Ask another question" : "Questions"}>
+          {remaining.map((id) => {
+            const question = getQuestion(id)
+            if (!question) return null
+            return (
+              <button key={id} className="ask" type="button" onClick={() => ask(question)} disabled={pending !== null}>
+                <span>{question.question}</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
+      <div className="talk-log" aria-live="polite" ref={logRef}>
         {turns.map((turn) => (
           <div key={turn.id} className={turn.role === "user" ? "bubble user" : "bubble guide"}>
             <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{turn.text}</p>
@@ -208,17 +241,12 @@ export function Conversation({
         ))}
         {pending ? <p className="muted">Preparing the stored answer…</p> : null}
       </div>
-      {remaining.length > 0 ? (
-        <div className={guide ? "ask-list" : "chips"} role="group" aria-label={turns.length ? "Ask another question" : "Questions"}>
+      {!guide && remaining.length > 0 ? (
+        <div className="chips" role="group" aria-label={turns.length ? "Ask another question" : "Questions"}>
           {remaining.map((id) => {
             const question = getQuestion(id)
             if (!question) return null
-            return guide ? (
-              <button key={id} className="ask" type="button" onClick={() => ask(question)} disabled={pending !== null}>
-                <span>{question.question}</span>
-                <span aria-hidden="true">→</span>
-              </button>
-            ) : (
+            return (
               <button key={id} className="chip" type="button" onClick={() => ask(question)} disabled={pending !== null}>
                 {question.question}
               </button>
