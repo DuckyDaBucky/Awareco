@@ -180,6 +180,12 @@ export function Conversation({
   }
 
   const latestGuide = [...turns].reverse().find((turn) => turn.role === "guide")?.text ?? intro ?? ""
+  const asked = new Set(turns.map((turn) => turn.questionId).filter(Boolean))
+  const remaining = questionIds.filter((id) => !asked.has(id))
+  const reset = () => {
+    stopSpeaking()
+    replace((current) => ({ ...current, threads: { ...current.threads, [surface]: [] } }))
+  }
   return (
     <div className={guide ? "chat" : undefined} data-conversation={surface}>
       {guide ? (
@@ -192,7 +198,7 @@ export function Conversation({
           <SpeechControl text={latestGuide} prominent />
         </div>
       ) : null}
-      {intro ? <p>{intro}</p> : null}
+      {intro && turns.length === 0 ? <p className="chat-intro">{intro}</p> : null}
       <div className="talk-log" aria-live="polite">
         {turns.map((turn) => (
           <div key={turn.id} className={turn.role === "user" ? "bubble user" : "bubble guide"}>
@@ -202,30 +208,30 @@ export function Conversation({
         ))}
         {pending ? <p className="muted">Preparing the stored answer…</p> : null}
       </div>
-      <div className="chips">
-        {questionIds.map((id) => {
-          const question = getQuestion(id)
-          if (!question) return null
-          return (
-            <button key={id} className="chip" type="button" onClick={() => ask(question)} disabled={pending !== null}>
-              {question.question}
-            </button>
-          )
-        })}
-      </div>
-      <div style={{ marginTop: 12 }}>
-        <button
-          className="btn ghost"
-          type="button"
-          onClick={() => {
-            stopSpeaking()
-            replace((current) => ({ ...current, threads: { ...current.threads, [surface]: [] } }))
-          }}
-        >
+      {remaining.length > 0 ? (
+        <div className={guide ? "ask-list" : "chips"} role="group" aria-label={turns.length ? "Ask another question" : "Questions"}>
+          {remaining.map((id) => {
+            const question = getQuestion(id)
+            if (!question) return null
+            return guide ? (
+              <button key={id} className="ask" type="button" onClick={() => ask(question)} disabled={pending !== null}>
+                <span>{question.question}</span>
+                <span aria-hidden="true">→</span>
+              </button>
+            ) : (
+              <button key={id} className="chip" type="button" onClick={() => ask(question)} disabled={pending !== null}>
+                {question.question}
+              </button>
+            )
+          })}
+        </div>
+      ) : null}
+      {turns.length > 0 ? (
+        <button className={guide ? "text-btn" : "btn ghost"} type="button" onClick={reset}>
           Restart conversation
         </button>
-      </div>
-      {guide ? <p className="muted" style={{ margin: "8px 0 0", fontSize: 12 }}>{guide.credit}</p> : null}
+      ) : null}
+      {guide ? <p className="muted chat-credit">{guide.credit}</p> : null}
     </div>
   )
 }
