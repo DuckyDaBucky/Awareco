@@ -4,6 +4,8 @@ Interactive demonstration for the Aston Martin Aramco Formula One Team. Fans mov
 
 Public repository: [github.com/DuckyDaBucky/Awareco](https://github.com/DuckyDaBucky/Awareco)
 
+Live site: [awareco.vercel.app](https://awareco.vercel.app). Pushes to `main` deploy there.
+
 This is a local demonstration. It does not call a model, take payment, or store an account. It is not an official team product. The build notes for the next person are in [`context/`](context/README.md).
 
 ## Run
