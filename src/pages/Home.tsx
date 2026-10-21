@@ -14,11 +14,17 @@ export function HomePage() {
           <h2>The People</h2>
           <p>Twelve stories from the programmes behind the team.</p>
         </Link>
-        <section className="panel">
-          <p className="muted">Your guide</p>
-          <h2 style={{ marginTop: 0 }}>{handoff.app.guide_name}</h2>
-          <p>{home.guide_intro}</p>
-          <Conversation surface="guide" questionIds={["guide_people", "guide_match", "guide_car"]} />
+        <section className="panel chat-panel">
+          <Conversation
+            surface="guide"
+            questionIds={["guide_people", "guide_match", "guide_car"]}
+            intro={home.guide_intro}
+            guide={{
+              name: handoff.app.guide_name,
+              image: "/assets/brand/ailonso.jpg",
+              credit: "Portrait: Off The Track Media, CC BY 2.0, via Wikimedia Commons.",
+            }}
+          />
         </section>
         <Link className="panel entry car-entry" to="/car">
           <p className="muted">Engineering</p>

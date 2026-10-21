@@ -18,3 +18,9 @@ export function speakText(text: string, onDone: () => void) {
   window.speechSynthesis.speak(utterance)
   return true
 }
+
+// Browser speech for now. A licensed Alonso voice from ElevenLabs or Grok
+// can replace speakGuide without changing the chat button.
+export function speakGuide(text: string, onDone: () => void) {
+  return speakText(text, onDone)
+}

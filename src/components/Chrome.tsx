@@ -1,6 +1,6 @@
 import { useEffect, useId, useState, type ReactNode } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
-import { speakText, speechAvailable, stopSpeaking } from "../lib/speech.ts"
+import { speakGuide, speechAvailable, stopSpeaking } from "../lib/speech.ts"
 import {
   KIND_LABEL,
   formatMetric,
@@ -125,10 +125,12 @@ export function Conversation({
   surface,
   questionIds,
   intro,
+  guide,
 }: {
   surface: string
   questionIds: string[]
   intro?: string
+  guide?: { name: string; image: string; credit: string }
 }) {
   const threads = useDemo((store) => store.state.threads)
   const skip = useDemo((store) => store.state.skipReveal || store.state.reducedMotion)
@@ -177,14 +179,24 @@ export function Conversation({
     setPending(timer)
   }
 
+  const latestGuide = [...turns].reverse().find((turn) => turn.role === "guide")?.text ?? intro ?? ""
   return (
-    <div data-conversation={surface}>
+    <div className={guide ? "chat" : undefined} data-conversation={surface}>
+      {guide ? (
+        <div className="chat-head">
+          <img className="chat-face" src={guide.image} alt="Fernando Alonso" />
+          <div>
+            <p className="muted" style={{ margin: 0 }}>Your guide</p>
+            <h2 style={{ margin: 0 }}>{guide.name}</h2>
+          </div>
+          <SpeechControl text={latestGuide} prominent />
+        </div>
+      ) : null}
       {intro ? <p>{intro}</p> : null}
       <div className="talk-log" aria-live="polite">
         {turns.map((turn) => (
           <div key={turn.id} className={turn.role === "user" ? "bubble user" : "bubble guide"}>
             <p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{turn.text}</p>
-            {surface === "guide" && turn.role === "guide" ? <SpeechControl text={turn.text} /> : null}
             {turn.role === "guide" && turn.questionId ? <AnswerExtras questionId={turn.questionId} /> : null}
           </div>
         ))}
@@ -213,26 +225,28 @@ export function Conversation({
           Restart conversation
         </button>
       </div>
+      {guide ? <p className="muted" style={{ margin: "8px 0 0", fontSize: 12 }}>{guide.credit}</p> : null}
     </div>
   )
 }
 
-function SpeechControl({ text }: { text: string }) {
+function SpeechControl({ text, prominent = false }: { text: string; prominent?: boolean }) {
   const [playing, setPlaying] = useState(false)
   useEffect(() => () => stopSpeaking(), [])
   if (!speechAvailable()) return null
   const toggle = () => {
+    if (!text) return
     if (playing) {
       stopSpeaking()
       setPlaying(false)
       return
     }
-    const started = speakText(text, () => setPlaying(false))
+    const started = speakGuide(text, () => setPlaying(false))
     setPlaying(started)
   }
   return (
-    <button className="chip" type="button" onClick={toggle} aria-pressed={playing}>
-      {playing ? "Stop" : "Play answer"}
+    <button className={prominent ? "voice-btn" : "chip"} type="button" onClick={toggle} aria-pressed={playing} aria-label={playing ? "Stop voice" : "Play voice"}>
+      {playing ? "Stop" : "Voice"}
     </button>
   )
 }
