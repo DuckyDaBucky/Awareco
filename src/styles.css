@@ -395,7 +395,9 @@ p { line-height: 1.5; }
 .evo-range::-webkit-slider-thumb { appearance: none; width: 18px; height: 18px; margin-top: -5px; border-radius: 50%; background: var(--lime); }
 .evo-range::-moz-range-track { height: 8px; background: transparent; }
 .evo-range::-moz-range-thumb { width: 18px; height: 18px; border: 0; border-radius: 50%; background: var(--lime); }
-.evo-year { margin: 8px 0 0; font-family: AstonMartinFlare, sans-serif; font-size: 28px; }
+.evo-year { margin: 28px 0 0; font-family: AstonMartinFlare, sans-serif; font-size: 28px; }
+.evo-ticks { position: relative; height: 22px; margin-top: 4px; }
+.evo-ticks span { position: absolute; transform: translateX(-50%); font-size: 12px; color: var(--muted); white-space: nowrap; }
 html.reduced .evo-top { animation: none; }
 
 .partner-shell { display: grid; grid-template-columns: 220px 1fr; gap: 18px; }
