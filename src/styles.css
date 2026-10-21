@@ -380,6 +380,11 @@ p { line-height: 1.5; }
   background-image:
     linear-gradient(#00000088, #000000e0),
     url("/assets/car/car-side.jpg");
+  background-position: center, 78% center;
+}
+.car-entry:hover,
+.car-entry:focus-visible {
+  background-position: center, 22% center;
 }
 .entry h2 { margin: 0 0 8px; font-size: 40px; }
 .metric-strip {
