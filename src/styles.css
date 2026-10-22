@@ -189,6 +189,9 @@ p { line-height: 1.5; }
 }
 
 .page { padding: calc(var(--header) + 28px) var(--gutter) 64px; }
+.page:has(.car-experience) { height: 100svh; min-height: 0; padding: var(--header) 0 0; overflow: hidden; }
+.page:has(.car-experience) + .site-foot { display: none; }
+body:has(.car-experience) { height: 100svh; overflow: hidden; }
 .notice {
   margin: 0 0 22px;
   color: var(--muted);
@@ -401,12 +404,49 @@ p { line-height: 1.5; }
 .source-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .source-list button { background: none; border: 0; color: var(--lime); cursor: pointer; padding: 0; text-decoration: underline; }
 
-.car-layout { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(320px, 1fr); gap: 18px; }
-.car-stage { background: transparent; }
-.car-frame { position: relative; width: min(520px, 100%); margin: 0 auto; }
+.car-experience { position: relative; height: calc(100svh - var(--header)); min-height: 0; overflow: hidden; }
+.car-experience > .muted { position: absolute; z-index: 4; top: 22px; left: clamp(20px, 4vw, 64px); margin: 0; color: #d5e5dfb3; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+.car-experience .car-heading { position: absolute; z-index: 4; top: 44px; left: clamp(20px, 4vw, 64px); right: clamp(20px, 4vw, 64px); margin: 0; pointer-events: none; }
+.car-experience .car-heading h1 { font-size: clamp(20px, 2vw, 30px); text-shadow: 0 2px 12px #000; }
+.car-experience .car-heading .btn { pointer-events: auto; }
+.car-selector { position: absolute; z-index: 5; top: 94px; left: 50%; width: max-content; max-width: calc(100% - 32px); transform: translateX(-50%); display: flex; justify-content: flex-start; gap: 7px; overflow-x: auto; scrollbar-width: thin; padding: 10px 0 14px; margin: 0; }
+.car-selector-item { flex: none; padding: 8px 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; font-size: 13px; line-height: 1.2; text-decoration: none; transition: color 180ms ease, border-color 180ms ease, background 180ms ease; }
+.car-selector-item:hover, .car-selector-item:focus-visible { color: white; border-color: #ffffff70; }
+.car-selector-item.active { color: var(--lime); border-color: var(--lime); background: #cedc0012; }
+.car-layout { position: absolute; inset: 158px 0 0; display: block; }
+.car-scene-shell { position: absolute; inset: 0 auto 0 0; width: 54%; height: 100%; overflow: hidden; background: transparent; border: 0; border-radius: 0; }
+.car-scene { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; }
+.car-scene canvas { width: 100%; height: 100%; display: block; }
+.car-part-marker { position: absolute; z-index: 2; left: 0; top: 0; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; transform: var(--marker-position, translate3d(0, 0, 0)) translate(-50%, -50%); border: 1px solid #ffffffb0; border-radius: 50%; background: #071410b8; box-shadow: 0 0 0 3px #06100e66, 0 2px 10px #000a; color: var(--lime); cursor: pointer; transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease; }
+.car-part-marker::before { content: ""; width: 11px; height: 11px; border: 2px solid currentColor; border-radius: 50%; box-shadow: 0 0 10px #d6e80075; }
+.car-part-marker:hover, .car-part-marker:focus-visible, .car-part-marker.active { z-index: 3; transform: var(--marker-position, translate3d(0, 0, 0)) translate(-50%, -50%) scale(1.16); border-color: var(--lime); background: #15251c; box-shadow: 0 0 0 5px #cedc0030, 0 0 22px #cedc0080; outline: none; }
+.car-part-marker span { position: absolute; left: 50%; bottom: calc(100% + 7px); padding: 5px 8px; transform: translate(-50%, 3px); border: 1px solid #ffffff2b; border-radius: 4px; background: #06100ef2; color: white; font-size: 12px; line-height: 1.2; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity 140ms ease, transform 140ms ease; }
+.car-part-marker:hover span, .car-part-marker:focus-visible span, .car-part-marker.active span { opacity: 1; transform: translate(-50%, 0); }
+.car-part-marker[hidden] { display: none; }
+.car-scene-status { position: absolute; top: 18px; left: 18px; padding: 7px 10px; background: #06110fd9; color: var(--muted); border-radius: 4px; font-size: 12px; }
+.car-scene-fallback { position: absolute; inset: 0; display: grid; place-items: center; background: #060d0c; }
+.car-scene-fallback img { max-width: 60%; max-height: 90%; object-fit: contain; }
+.car-scene-fallback p { position: absolute; bottom: 28px; color: var(--muted); font-size: 12px; }
+.car-model-credit { position: absolute; left: 14px; right: 14px; bottom: 10px; margin: 0; color: #d5e5dfb3; font-size: 11px; line-height: 1.4; text-align: center; text-shadow: 0 1px 5px #000; }
+.car-model-credit a { color: inherit; text-underline-offset: 2px; }
+.car-stage { min-width: 0; background: #030605; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.car-frame { position: relative; width: min(400px, 100%); aspect-ratio: 3 / 4; margin: 0 auto; overflow: hidden; }
+.car-camera { position: absolute; inset: 0; will-change: transform; transition: transform 1450ms cubic-bezier(.22, 1, .3, 1); }
 .car-photo, .evo-car { width: 100%; height: auto; display: block; }
 .evo-car { border-radius: var(--radius); background: #000; }
-.car-caption { margin-top: 10px; }
+.car-caption { margin: 0; min-height: 38px; padding: 8px 14px 10px; text-align: center; font-size: 12px; letter-spacing: .04em; }
+.car-detail { position: absolute; z-index: 3; top: 0; right: clamp(20px, 2.4vw, 36px); bottom: 16px; width: min(650px, 43vw); min-height: 0; overflow: visible; opacity: 0; transform: translateY(16px); }
+.car-detail[aria-hidden="true"] { pointer-events: none; }
+.car-detail > .panel { height: 100%; min-height: 0; overflow: hidden; padding: 18px; background: #06100ee8; border-color: #ffffff2b; box-shadow: 0 18px 60px #0008; backdrop-filter: blur(18px); }
+.car-detail > .panel > .btn:last-child { display: none; }
+.car-detail [data-conversation] .ask-list, .car-detail [data-conversation] > .chips { display: none; }
+.car-detail:has(.car-overview-note) { left: clamp(16px, 4vw, 64px); right: auto; bottom: 16px; width: auto; min-height: 0; max-height: none; overflow: visible; }
+.car-overview-note { display: inline-block; margin: 0; padding: 10px 14px; color: #d5e5dfcc; background: #06100ebd; border: 1px solid #ffffff24; border-radius: 4px; backdrop-filter: blur(12px); font-size: 13px; text-shadow: 0 1px 5px #000; }
+.car-scene-loading { display: grid; place-items: center; color: var(--muted); }
+.car-intro { padding: 24px; }
+.car-intro h2 { max-width: 12ch; margin: 0 0 18px; font-size: clamp(36px, 4vw, 62px); line-height: .98; }
+.car-intro p { max-width: 46ch; }
+.car-intro-rule { display: block; width: 64px; height: 1px; margin: 28px 0; background: var(--lime); }
 .guide-note { color: var(--muted); font-size: 14px; }
 .site-foot { padding: 8px var(--gutter) 28px; color: var(--muted); font-size: 13px; }
 .site-foot a { color: var(--muted); }
@@ -430,6 +470,7 @@ p { line-height: 1.5; }
   display: block;
 }
 .hotspot:hover i, .hotspot.active i, .hotspot:focus-visible i { border-color: var(--lime); background: #cedc0033; }
+.car-stage:has(.hotspot.active) .hotspot:not(.active) { opacity: .38; }
 .hotspot em {
   position: absolute;
   left: 48px;
@@ -441,9 +482,11 @@ p { line-height: 1.5; }
   padding: 2px 6px;
   opacity: 0;
 }
-.hotspot:hover em, .hotspot:focus-visible em, .hotspot.active em { opacity: 1; }
+.hotspot:hover em, .hotspot:focus-visible em { opacity: 1; }
 .part-visual { min-height: 180px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; position: relative; overflow: hidden; }
-.part-visual img { width: 100%; height: 210px; object-fit: cover; display: block; border-radius: 8px; background: #000; }
+.part-visual img { width: 100%; height: 180px; object-fit: cover; display: block; border-radius: 8px; background: #000; }
+.part-visual-state { animation: part-state-in 360ms ease both; }
+@keyframes part-state-in { from { opacity: .35; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 .part-visual.xray { background: repeating-linear-gradient(135deg, #0c2420, #0c2420 8px, #000 8px, #000 16px); }
 .flow { height: 8px; background: var(--mid); border-radius: 99px; overflow: hidden; margin-top: 24px; }
 .flow span { display: block; height: 100%; width: 40%; background: var(--lime); animation: flow 1.6s linear infinite; }
@@ -556,10 +599,38 @@ html.reduced .evo-top { animation: none; }
   .home-grid:has(.car-entry:focus-visible),
   .home-grid:has(.chat-panel:hover),
   .home-grid:has(.chat-panel:focus-within),
-  .car-layout, .persona-layout, .people-grid, .partner-shell, .metric-strip, .grid-2, .evo-record, .evo-record.solo {
+  .persona-layout, .people-grid, .partner-shell, .metric-strip, .grid-2, .evo-record, .evo-record.solo {
     grid-template-columns: 1fr;
   }
   .entry { min-height: 420px; }
+  .car-detail { width: min(650px, 43vw); }
+  .car-scene-shell { width: 49%; }
+  .car-detail { width: min(500px, 49vw); right: 12px; }
+  .car-detail .component-metrics { display: none; }
+  .car-detail > .panel { padding: 14px; }
+  .car-detail .part-visual img { height: 130px; }
+}
+@media (max-width: 700px) {
+  .car-experience { min-height: 0; }
+  .car-experience > .muted { top: 14px; left: 16px; font-size: 10px; }
+  .car-experience .car-heading { top: 32px; left: 16px; right: 16px; }
+  .car-experience .car-heading h1 { font-size: 18px; }
+  .car-experience .car-heading .btn { font-size: 11px; padding: 8px 10px; }
+  .car-selector { top: 78px; left: 8px; right: 8px; width: auto; max-width: none; transform: none; padding: 8px 8px 12px; }
+  .car-selector-item { font-size: 11px; padding: 7px 10px; }
+  .car-layout { inset: 124px 0 0; }
+  .car-scene-shell { width: 100%; }
+  .car-detail { left: 12px; right: 12px; top: 0; bottom: auto; width: auto; min-height: 0; }
+  .car-detail > .panel { height: auto; min-height: 0; }
+  .car-detail [data-conversation], .car-detail .component-metrics, .car-detail > .panel > .btn:last-child { display: none; }
+  .car-detail:has(.car-overview-note) { left: 12px; right: auto; bottom: 12px; }
+  .car-overview-note { font-size: 11px; padding: 8px 10px; }
+  .car-detail > .panel { padding: 16px; }
+  .car-detail .part-visual { min-height: 0; padding: 9px; }
+  .car-detail .part-visual img { height: 120px; }
+  .car-detail .part-visual .chips { display: none; }
+  .car-detail .grid-2 > div:first-child p + p { display: none; }
+  .car-model-credit { font-size: 10px; }
 }
 @media (max-width: 767px) {
   :root { --gutter: 20px; --header: 84px; }

@@ -23,6 +23,15 @@ export function CarStage({
         return { ...hotspot, ...placed, componentId: component.id, label: component.label }
       }),
   )
+  const selected = spots.find((spot) => spot.id === focusHotspot)
+    ?? spots.find((spot) => spot.componentId === activeId)
+  const selectedSpotId = selected?.id
+  const scale = selected ? 1.52 : 1
+  const cameraStyle = {
+    transform: selected
+      ? `translate(${(0.5 - selected.x) * scale * 100}%, ${(0.5 - selected.y) * scale * 100}%) scale(${scale})`
+      : "translate(0%, 0%) scale(1)",
+  }
   return (
     <div className="car-stage">
       <div
@@ -33,24 +42,26 @@ export function CarStage({
           navigate("/car/evolution")
         }}
       >
-        <img className="car-photo" src="/assets/car/car-top.jpg" alt="Top view of a Formula One car used as the explorer" />
-        {spots.map((spot) => (
+        <div className="car-camera" style={cameraStyle}>
+          <img className="car-photo" src="/assets/car/car-top.jpg" alt="Top view of a Formula One car used as the explorer" />
+          {spots.map((spot) => (
           <button
             key={spot.id}
             id={`hotspot-${spot.id}`}
-            className={activeId === spot.componentId && (!focusHotspot || focusHotspot === spot.id) ? "hotspot active" : "hotspot"}
+            className={selectedSpotId === spot.id ? "hotspot active" : "hotspot"}
             style={{ left: `${spot.x * 100}%`, top: `${spot.y * 100}%` }}
             type="button"
             aria-label={spot.label}
-            aria-pressed={activeId === spot.componentId}
+            aria-pressed={selectedSpotId === spot.id}
             onClick={() => navigate(`/car/${spot.componentId}?spot=${spot.id}`)}
           >
             <i />
             <em>{spot.label}</em>
           </button>
-        ))}
+          ))}
+        </div>
       </div>
-      <p className="muted car-caption">Select a square to explore a component.</p>
+      <p className="muted car-caption">{selected ? `Focusing on ${selected.label}` : "Select a component to explore the car."}</p>
     </div>
   )
 }
@@ -75,16 +86,15 @@ const calibrated: Record<string, { x: number; y: number }> = {
   active_aero_1: { x: 0.5, y: 0.876 },
 }
 
-export function ComponentPanel({ component, spot }: { component: ComponentRecord; spot?: string }) {
+export function ComponentPanel({ component }: { component: ComponentRecord }) {
   const generation = useDemo((store) => store.state.generation)
   const replace = useDemo((store) => store.replace)
   const navigate = useNavigate()
   const season = generation === "2025" ? "2025" : "2026"
   const variant = component.variants.find((item) => item.id === season) ?? component.variants[1]
   const close = () => {
-    const focusId = spot ? `hotspot-${spot}` : `hotspot-${component.hotspots[0]?.id ?? ""}`
     navigate("/car")
-    window.setTimeout(() => document.getElementById(focusId)?.focus(), 0)
+    window.setTimeout(() => document.getElementById("car-overview")?.focus(), 0)
   }
 
   useEffect(() => {
@@ -115,7 +125,7 @@ export function ComponentPanel({ component, spot }: { component: ComponentRecord
         </div>
         <PartVisual id={component.id} animation={component.animation} states={component.animation_controls.states} />
       </div>
-      <div className="grid-2" style={{ marginTop: 12 }}>
+      <div className="component-metrics grid-2" style={{ marginTop: 12 }}>
         {(variant?.metric_ids.length ? variant.metric_ids : component.metric_ids).map((id) => (
           <MetricCard key={id} id={id} />
         ))}
@@ -155,15 +165,17 @@ function PartVisual({ id, animation, states }: { id: string; animation: string; 
   const [index, setIndex] = useState(0)
   useEffect(() => {
     if (!playing || reduced || !states?.length) return
-    const timer = window.setInterval(() => setIndex((value) => (value + 1) % states.length), 900)
+    const timer = window.setInterval(() => setIndex((value) => (value + 1) % states.length), 2100)
     return () => window.clearInterval(timer)
   }, [playing, reduced, states])
   const state = states?.[index]
   return (
     <div className="part-visual">
       <img src={`/assets/parts/${id}.jpg`} alt="" />
-      {state ? <p className="flare" style={{ marginBottom: 0 }}>{state}</p> : null}
-      <p>{caption(animation, state)}</p>
+      <div key={state ?? "still"} className="part-visual-state" aria-live="polite">
+        {state ? <p className="flare" style={{ marginBottom: 0 }}>{state}</p> : null}
+        <p>{caption(animation, state)}</p>
+      </div>
       {states?.length ? (
         <div className="chips">
           <button className="chip" type="button" onClick={() => setPlaying((value) => !value)}>{playing ? "Pause" : "Play"}</button>
