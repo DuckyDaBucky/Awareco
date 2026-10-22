@@ -9,9 +9,11 @@
 | `src/pages/CarPages.tsx` | Component explorer and the evolution slider |
 | `src/components/CarStage.tsx` | Top-down car, hotspots, component panel |
 | `src/components/Chrome.tsx` | Header, menu, conversation, metrics, source drawer |
+| `src/components/ProgrammeEvidence.tsx` | Shared programme cards, profiles, evidence labels, visualizations, and source library |
 | `src/components/Portraits.tsx` | Guide portraits |
 | `src/lib/content.ts` | Reads the handoff and looks up records |
 | `src/lib/logic.ts` | Matching, scenarios, and the handoff validator |
+| `src/lib/programmes.ts` | Canonical enriched programme records shared by People and Partners |
 | `src/lib/store.ts` | Session state for threads, role, and programme |
 | `src/lib/speech.ts` | Play and stop for the stored answer |
 | `src/styles.css` | Layout and brand styling |
@@ -19,7 +21,7 @@
 
 ## Content and images
 
-`content/handoff/make-a-mark-live.json` is the contract. Change a figure there, not in a component.
+`content/handoff/make-a-mark-live.json` remains the contract for metrics, sources, questions, roles, scenarios, and actions. Detailed programme editorial structure lives in `src/lib/programmes.ts`; both People and Partners consume the merged canonical record returned by `getProgrammeRecord`.
 
 | Folder | Contents |
 | --- | --- |
@@ -35,7 +37,9 @@ The Alonso credit on the home guide is: Portrait: Off The Track Media, CC BY 2.0
 
 ## Routes worth knowing
 
-`/` home, `/car` and `/car/:componentId`, `/car/evolution`, `/people` and `/people/:personaId`, `/match`, `/partners` and the partner subpages, `/impact`, `/race`, `/simulate`, `/demo`, `/methodology`.
+`/` home, `/car` and `/car/:componentId`, `/car/evolution`, `/people` and `/people/:personaId`, `/match`, `/impact`, `/race`, `/simulate`, `/demo`, and `/methodology`.
+
+The Partner workspace uses `/partners`, `/partners/programmes`, `/partners/programmes/:programmeId`, `/partners/compare`, `/partners/scenarios`, `/partners/reports`, `/partners/data-quality`, `/partners/inclusion`, and `/partners/business-case`. The old `/partners/simulate` and `/partners/gaps` paths remain as compatible aliases.
 
 A missing route renders the in-app missing page.
 

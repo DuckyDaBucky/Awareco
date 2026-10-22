@@ -1,91 +1,147 @@
 import { useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { Conversation, MetricCard, SourceDrawer } from "../components/Chrome.tsx"
-import { Portrait } from "../components/Portraits.tsx"
-import { getPersona, getSource, listPersonas } from "../lib/content.ts"
+import { ProgrammeCard, ProgrammeHero, ProgrammeProfileBody } from "../components/ProgrammeEvidence.tsx"
+import { getProgrammeRecord, listProgrammeRecords, type EvidenceCoverage } from "../lib/programmes.ts"
+import { getPersona, handoff } from "../lib/content.ts"
 import { matchPersonas } from "../lib/logic.ts"
-import { handoff } from "../lib/content.ts"
 import { useDemo } from "../lib/store.ts"
 
+type PillarFilter = "ALL" | "BELONG" | "COMMUNITY"
+type CoverageFilter = "all" | EvidenceCoverage
+
 export function PeoplePage() {
-  const [filter, setFilter] = useState<"ALL" | "BELONG" | "COMMUNITY">("ALL")
-  const people = listPersonas().filter((person) => filter === "ALL" || person.pillar === filter)
+  const [pillar, setPillar] = useState<PillarFilter>("ALL")
+  const [coverage, setCoverage] = useState<CoverageFilter>("all")
+  const [query, setQuery] = useState("")
+  const records = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return listProgrammeRecords().filter((record) => {
+      if (pillar !== "ALL" && record.person.pillar !== pillar) return false
+      if (coverage !== "all" && record.coverage !== coverage) return false
+      if (!needle) return true
+      return [record.person.programme_name, record.person.partner_name, record.editorial.dek, record.editorial.audience]
+        .join(" ")
+        .toLowerCase()
+        .includes(needle)
+    })
+  }, [pillar, coverage, query])
+
+  const all = listProgrammeRecords()
+  const measured = all.filter((record) => record.coverage === "measured").length
+  const narrative = all.filter((record) => record.coverage === "narrative").length
+
   return (
     <>
-      <p className="muted">The people</p>
-      <h1>Meet the minds behind the machine.</h1>
-      <div className="chips" style={{ marginBottom: 16 }}>
-        {(["ALL", "BELONG", "COMMUNITY"] as const).map((item) => (
-          <button key={item} className={filter === item ? "chip active" : "chip"} type="button" onClick={() => setFilter(item)}>
-            {item === "ALL" ? "All" : item === "BELONG" ? "Belong" : "Community"}
-          </button>
-        ))}
+      <section className="people-masthead">
+        <div>
+          <p className="eyebrow">Community evidence library</p>
+          <h1>Every programme deserves more than a card and a number.</h1>
+          <p>Explore the people, partnerships and reported outcomes behind Make A Mark—with the evidence and its limitations kept together.</p>
+        </div>
+        <dl>
+          <div><dt>Programmes</dt><dd>{all.length}</dd></div>
+          <div><dt>Measured profiles</dt><dd>{measured}</dd></div>
+          <div><dt>Narrative-only</dt><dd>{narrative}</dd></div>
+        </dl>
+      </section>
+
+      <section className="library-controls" aria-label="Filter programmes">
+        <label className="search-control">
+          <span>Search programmes</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Programme, partner or audience" />
+        </label>
+        <div>
+          <span className="control-label">Pillar</span>
+          <div className="chips">
+            {(["ALL", "BELONG", "COMMUNITY"] as const).map((item) => (
+              <button key={item} className={pillar === item ? "chip active" : "chip"} type="button" onClick={() => setPillar(item)}>
+                {item === "ALL" ? "All" : item === "BELONG" ? "Belong" : "Community"}
+              </button>
+            ))}
+          </div>
+        </div>
+        <label>
+          <span className="control-label">Evidence coverage</span>
+          <select value={coverage} onChange={(event) => setCoverage(event.target.value as CoverageFilter)}>
+            <option value="all">All evidence levels</option>
+            <option value="measured">Measured outcomes</option>
+            <option value="partial">Partial measurement</option>
+            <option value="narrative">Narrative evidence</option>
+          </select>
+        </label>
+      </section>
+
+      <div className="library-result-line">
+        <p>{records.length} programme{records.length === 1 ? "" : "s"}</p>
+        <Link to="/match">Help me find a story →</Link>
       </div>
-      <div className="people-grid">
-        {people.map((person) => (
-          <Link key={person.id} className="panel person-card" to={`/people/${person.id}`}>
-            <Portrait name={person.name} id={person.id} />
-            <h2>{person.name}</h2>
-            <p className="muted">Illustrative guide</p>
-            <p>{person.role}</p>
-            <p>{person.programme_name}</p>
-          </Link>
-        ))}
+      <div className="programme-grid">
+        {records.map((record) => <ProgrammeCard key={record.person.id} record={record} to={`/people/${record.person.id}`} />)}
       </div>
-      {people.length === 0 ? <p>No stories match that filter.</p> : null}
+      {records.length === 0 ? (
+        <section className="evidence-empty">
+          <span aria-hidden="true">—</span>
+          <div><h2>No programmes match</h2><p>Try a broader search or reset the evidence filter.</p></div>
+        </section>
+      ) : null}
     </>
   )
 }
 
 export function PersonaPage() {
   const { personaId } = useParams()
-  const person = personaId ? getPersona(personaId) : undefined
+  const record = personaId ? getProgrammeRecord(personaId) : undefined
   const replace = useDemo((store) => store.replace)
-  const [sourceId, setSourceId] = useState<string | null>(null)
   const [note, setNote] = useState<string | null>(null)
-  if (!person) {
+  if (!record) {
     return (
       <section className="panel">
         <h1>{handoff.app.errors.unknown_persona}</h1>
-        <Link to="/people">Back to the stories</Link>
+        <Link to="/people">Back to the programme library</Link>
       </section>
     )
   }
-  const source = getSource(person.article.source_id)
+
+  const related = listProgrammeRecords()
+    .filter((candidate) => candidate.person.id !== record.person.id && candidate.person.pillar === record.person.pillar)
+    .slice(0, 3)
+
+  const save = () => {
+    replace((current) => ({
+      ...current,
+      interests: current.interests.includes(record.person.id) ? current.interests : [...current.interests, record.person.id],
+    }))
+    setNote("Interest saved in this browser. Nothing was submitted.")
+  }
+
+  const copy = () => {
+    void navigator.clipboard?.writeText(window.location.href)
+    setNote("Programme link copied.")
+  }
+
   return (
     <>
-      <p className="muted">{person.programme_name}</p>
-      <h1>Talk to the people making their mark</h1>
-      <div className="persona-layout">
-        <section className="panel">
-          <Portrait name={person.name} id={person.id} />
-          <h2>{person.name}</h2>
-          <p>{person.role}</p>
-          <p className="muted">Illustrative guide</p>
-          <p className="guide-note">{person.name} is an illustrative guide to {person.programme_name}. The programme and the cited figures come from the published report. The name and portrait were created for this demonstration.</p>
-          <Conversation surface={`person:${person.id}`} questionIds={person.question_ids} intro={person.intro} />
-        </section>
-        <section className="panel">
-          <h2>Reported outcomes</h2>
-          {person.metric_ids.length === 0 ? <p>No numerical outcome is loaded for this programme. The story still has a source.</p> : person.metric_ids.map((id) => <MetricCard key={id} id={id} />)}
-        </section>
-        <section className="panel">
-          <p className="muted">Authored summary, not a verbatim article</p>
-          <h2>{person.article.title}</h2>
-          {person.article.paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-          <button className="btn" type="button" onClick={() => setSourceId(person.article.source_id)}>Read the official source</button>
-          <div className="chips" style={{ marginTop: 12 }}>
-            <button className="chip" type="button" onClick={() => {
-              replace((current) => ({ ...current, interests: current.interests.includes(person.id) ? current.interests : [...current.interests, person.id] }))
-              setNote("Interest saved in this demo. Nothing was submitted.")
-            }}>Save interest in this demo</button>
-            <button className="chip" type="button" onClick={() => { void navigator.clipboard?.writeText(window.location.href); setNote("Link copied. Nothing was posted.") }}>Copy link</button>
-          </div>
-          {note ? <p>{note}</p> : null}
-          {source ? <p className="muted">{source.title}</p> : null}
-        </section>
-      </div>
-      {sourceId ? <SourceDrawer sourceId={sourceId} onClose={() => setSourceId(null)} /> : null}
+      <div className="profile-back"><Link to="/people">← Programme library</Link></div>
+      <ProgrammeHero
+        record={record}
+        actions={(
+          <>
+            <button className="btn" type="button" onClick={save}>Save programme</button>
+            <button className="btn ghost" type="button" onClick={copy}>Copy link</button>
+          </>
+        )}
+      />
+      {note ? <p className="action-note" role="status">{note}</p> : null}
+      <ProgrammeProfileBody record={record} />
+      <section className="related-programmes">
+        <div className="section-heading">
+          <div><p className="eyebrow">Keep exploring</p><h2>Related programmes</h2></div>
+          <Link to="/people">View all</Link>
+        </div>
+        <div className="programme-grid compact">
+          {related.map((candidate) => <ProgrammeCard key={candidate.person.id} record={candidate} to={`/people/${candidate.person.id}`} />)}
+        </div>
+      </section>
     </>
   )
 }
@@ -106,34 +162,36 @@ export function MatchPage() {
   }
   const person = getPersona(result.primary)
   return (
-    <>
-      <h1>Find a story</h1>
-      <p>Fixed matching rules. You can skip a question. Nothing here asks about identity, health, or belief.</p>
+    <section className="match-shell">
+      <p className="eyebrow">Guided discovery</p>
+      <h1>Find a programme story</h1>
+      <p>Choose what interests you. The matching rules are fixed, and you can skip any question.</p>
       {!done && current ? (
-        <section className="panel">
+        <section className="panel match-card">
+          <p className="muted">Question {step + 1} of {questions.length}</p>
           <h2>{current.label}</h2>
-          <div className="chips">
+          <div className="match-options">
             {current.options.map((option) => (
-              <button key={option} className="chip" type="button" onClick={() => choose(option)}>{option}</button>
+              <button key={option} type="button" onClick={() => choose(option)}>{option}<span>→</span></button>
             ))}
-            <button className="chip" type="button" onClick={() => choose(null)}>Skip</button>
+            <button type="button" onClick={() => choose(null)}>Skip this question<span>→</span></button>
           </div>
         </section>
       ) : (
-        <section className="panel">
-          <h2>{person?.name}</h2>
+        <section className="panel match-card">
+          <p className="eyebrow">Recommended story</p>
+          <h2>{person?.programme_name}</h2>
           <p>{result.reason}</p>
-          <p>{person?.programme_name}</p>
-          <Link className="btn" to={`/people/${result.primary}`}>Open the story</Link>
-          <div className="chips" style={{ marginTop: 12 }}>
+          <Link className="btn" to={`/people/${result.primary}`}>Open the programme profile</Link>
+          <div className="chips match-alternatives">
             {result.alternatives.map((id) => {
-              const alt = getPersona(id)
-              return alt ? <Link key={id} className="chip" to={`/people/${id}`}>{alt.name} · {alt.programme_name}</Link> : null
+              const alternative = getPersona(id)
+              return alternative ? <Link key={id} className="chip" to={`/people/${id}`}>{alternative.programme_name}</Link> : null
             })}
           </div>
-          <button className="btn ghost" type="button" style={{ marginTop: 12 }} onClick={() => { replace((state) => ({ ...state, matchAnswers: {} })); setStep(0); setDone(false) }}>Restart</button>
+          <button className="btn ghost" type="button" onClick={() => { replace((state) => ({ ...state, matchAnswers: {} })); setStep(0); setDone(false) }}>Start again</button>
         </section>
       )}
-    </>
+    </section>
   )
 }

@@ -19,6 +19,17 @@ type Reservation = {
 }
 
 type EngineState = "ready" | "extracting" | "classified" | "review_required" | "approved" | "rejected"
+export type ProgrammeReviewStatus = "draft" | "in_review" | "approved"
+
+export type SavedScenario = {
+  id: string
+  scenarioId: string
+  title: string
+  inputs: Record<string, number>
+  outputs: Record<string, number | string>
+  sourceIds: string[]
+  at: string
+}
 
 export type DemoState = {
   version: 1
@@ -27,7 +38,7 @@ export type DemoState = {
   generation: string
   threads: Record<string, Turn[]>
   matchAnswers: Record<string, string | null>
-  savedScenarios: { id: string; scenarioId: string; inputs: Record<string, number>; at: string }[]
+  savedScenarios: SavedScenario[]
   reportScenarioId: string | null
   reservations: Reservation[]
   capacity: Record<string, number>
@@ -41,6 +52,7 @@ export type DemoState = {
   events: { id: string; type: string }[]
   campaignId: string | null
   gapStatus: Record<string, string>
+  programmeReview: Record<string, ProgrammeReviewStatus>
   skipReveal: boolean
   reducedMotion: boolean
   reactionTimes: number[]
@@ -75,6 +87,7 @@ export function initialState(): DemoState {
     events: [],
     campaignId: null,
     gapStatus: Object.fromEntries(handoff.partners.data_gaps.map((gap) => [gap.id, gap.status])),
+    programmeReview: Object.fromEntries(handoff.people.map((person) => [person.id, "draft" as ProgrammeReviewStatus])),
     skipReveal: false,
     reducedMotion: false,
     reactionTimes: [],
@@ -89,7 +102,14 @@ function read(): DemoState {
     if (!raw) return initialState()
     const parsed = JSON.parse(raw) as DemoState
     if (parsed.version !== 1) return initialState()
-    return { ...initialState(), ...parsed, capacity: { ...initialCapacity(), ...parsed.capacity } }
+    const defaults = initialState()
+    return {
+      ...defaults,
+      ...parsed,
+      capacity: { ...initialCapacity(), ...parsed.capacity },
+      gapStatus: { ...defaults.gapStatus, ...parsed.gapStatus },
+      programmeReview: { ...defaults.programmeReview, ...parsed.programmeReview },
+    }
   } catch {
     return initialState()
   }

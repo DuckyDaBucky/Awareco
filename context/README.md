@@ -6,5 +6,6 @@ This folder is the handoff from the build session that produced the public repos
 2. [Decisions](decisions.md) is what was asked for during the build, and what was settled.
 3. [Interface](interface.md) is the visual system and the interactions that are easy to break.
 4. [Files](files.md) is where the code and the content live.
+5. [People and Partners overhaul plan](partners-overhaul-plan.md) records the architecture, delivery sequence, and definition of done for the rebuilt evidence experience.
 
 The app runs with `npm run dev` from the repository root and opens at http://127.0.0.1:47231.

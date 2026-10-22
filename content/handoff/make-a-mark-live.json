@@ -6682,12 +6682,27 @@
       },
       {
         "path": "/partners/programmes",
-        "title": "Programme evidence",
+        "title": "Programme library",
+        "section": "partners"
+      },
+      {
+        "path": "/partners/programmes/:programmeId",
+        "title": "Programme workspace",
+        "section": "partners"
+      },
+      {
+        "path": "/partners/compare",
+        "title": "Compare programme evidence",
         "section": "partners"
       },
       {
         "path": "/partners/simulate",
-        "title": "Initiative simulator",
+        "title": "Legacy initiative simulator",
+        "section": "partners"
+      },
+      {
+        "path": "/partners/scenarios",
+        "title": "Scenario planning studio",
         "section": "partners"
       },
       {
@@ -6697,7 +6712,12 @@
       },
       {
         "path": "/partners/gaps",
-        "title": "Data gaps",
+        "title": "Legacy data gaps",
+        "section": "partners"
+      },
+      {
+        "path": "/partners/data-quality",
+        "title": "Data quality",
         "section": "partners"
       },
       {

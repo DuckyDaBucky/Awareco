@@ -14,7 +14,7 @@ AI.lonso is the guide on the home page. The name on screen is `AI.lonso`. The fa
 
 Answers, metrics, and links come from `content/handoff/make-a-mark-live.json`. A number on screen has a source in that file. The validator in `src/lib/logic.ts` checks the expected counts and that ids point at each other.
 
-Expected counts: 49 metrics, 42 sources, 99 questions, 11 components, 12 people, 100 actions, 24 routes.
+Expected counts: 49 metrics, 42 sources, 99 questions, 11 components, 12 people, 100 actions, 28 routes.
 
 Do not put presenter caveats in the interface. Lines such as “interactive concept demo”, “conversations are prewritten”, and “this fictional guide did not design the component” were removed on purpose. Those points belong in the presentation and in this folder, not on a card the audience reads.
 

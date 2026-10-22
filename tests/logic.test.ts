@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { getMetric, handoff, roleForProgramme } from "../src/lib/content.ts"
 import { emissionsOutcome, matchPersonas, mentoringOutcome, outreachOutcome, validateHandoff } from "../src/lib/logic.ts"
+import { getProgrammeRecord, listProgrammeRecords, programmeReadiness } from "../src/lib/programmes.ts"
 
 describe("handoff contract", () => {
   it("matches the expected counts and references", () => {
@@ -11,7 +12,7 @@ describe("handoff contract", () => {
     expect(handoff.actions).toHaveLength(100)
     expect(handoff.car.components).toHaveLength(11)
     expect(handoff.people).toHaveLength(12)
-    expect(handoff.app.routes).toHaveLength(24)
+    expect(handoff.app.routes).toHaveLength(28)
   })
 
   it("keeps null distinct from zero", () => {
@@ -38,5 +39,32 @@ describe("matching and partner deep link", () => {
   it("opens Aleto in the charity view", () => {
     expect(roleForProgramme("aleto")).toBe("charity")
     expect(getMetric("footprint_2025")?.value).toBe(87162.4)
+  })
+})
+
+describe("canonical programme evidence", () => {
+  it("provides an enriched record for every programme", () => {
+    const records = listProgrammeRecords()
+    expect(records).toHaveLength(12)
+    expect(records.every((record) => record.editorial.sections.length >= 3)).toBe(true)
+    expect(records.filter((record) => record.coverage === "narrative").map((record) => record.person.id)).toEqual([
+      "racing-pride",
+      "techvets",
+      "mechanics",
+    ])
+  })
+
+  it("keeps missing programme outcomes explicit", () => {
+    const racingPride = getProgrammeRecord("racing-pride")!
+    expect(racingPride.metrics).toEqual([])
+    expect(racingPride.coverage).toBe("narrative")
+    expect(programmeReadiness(racingPride).score).toBe(50)
+  })
+
+  it("retains Aleto evidence context and report readiness", () => {
+    const aleto = getProgrammeRecord("aleto")!
+    expect(aleto.metrics.map((metric) => metric.id)).toEqual(["aleto_cohort", "aleto_network", "aleto_leadership"])
+    expect(aleto.evidenceState).toBe("verified")
+    expect(programmeReadiness(aleto).score).toBe(85)
   })
 })

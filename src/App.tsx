@@ -6,7 +6,7 @@ import { BoothPage, CampaignPage, DemoPage, EnginePage, ExperiencesPage, Methodo
 import { HomePage } from "./pages/Home.tsx"
 import { ImpactPage } from "./pages/ImpactPages.tsx"
 import { MatchPage, PeoplePage, PersonaPage } from "./pages/PeoplePages.tsx"
-import { BusinessPage, PartnerGaps, PartnerHome, PartnerInclusion, PartnerProgrammes, PartnerReport, PartnerSimulate } from "./pages/PartnerPages.tsx"
+import { BusinessPage, PartnerCompare, PartnerGaps, PartnerHome, PartnerInclusion, PartnerProgrammes, PartnerProgrammeWorkspace, PartnerReport, PartnerSimulate } from "./pages/PartnerPages.tsx"
 import { SimulatePage } from "./pages/Scenario.tsx"
 
 if (import.meta.env.DEV) {
@@ -30,8 +30,12 @@ export default function App() {
           <Route path="/race" element={<RacePage />} />
           <Route path="/simulate" element={<SimulatePage />} />
           <Route path="/partners/programmes" element={<PartnerProgrammes />} />
+          <Route path="/partners/programmes/:programmeId" element={<PartnerProgrammeWorkspace />} />
+          <Route path="/partners/compare" element={<PartnerCompare />} />
+          <Route path="/partners/scenarios" element={<PartnerSimulate />} />
           <Route path="/partners/simulate" element={<PartnerSimulate />} />
           <Route path="/partners/reports" element={<PartnerReport />} />
+          <Route path="/partners/data-quality" element={<PartnerGaps />} />
           <Route path="/partners/gaps" element={<PartnerGaps />} />
           <Route path="/partners/inclusion" element={<PartnerInclusion />} />
           <Route path="/partners/business-case" element={<BusinessPage />} />

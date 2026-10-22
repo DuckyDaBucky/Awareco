@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from "react"
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react"
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom"
 import { speakGuide, speechAvailable, stopSpeaking } from "../lib/speech.ts"
 import {
@@ -135,7 +135,7 @@ export function Conversation({
   const threads = useDemo((store) => store.state.threads)
   const skip = useDemo((store) => store.state.skipReveal || store.state.reducedMotion)
   const replace = useDemo((store) => store.replace)
-  const turns = threads[surface] ?? []
+  const turns = useMemo(() => threads[surface] ?? [], [threads, surface])
   const [pending, setPending] = useState<number | null>(null)
   const logRef = useRef<HTMLDivElement>(null)
   const seenTurns = useRef(turns.length)

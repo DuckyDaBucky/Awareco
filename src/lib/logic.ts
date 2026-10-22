@@ -39,6 +39,12 @@ export function mentoringOutcome(cohortSize: number, budgetGbp: number) {
   return budget / cohort
 }
 
+export function scenarioOutcome(id: string, inputs: Record<string, number>): Record<string, number> {
+  if (id === "emissions") return emissionsOutcome(inputs.supplier_coverage ?? 0, inputs.hq_coverage ?? 0)
+  if (id === "stem") return outreachOutcome(inputs.funding_change_percent ?? 0)
+  return { illustrative_cost_per_participant: mentoringOutcome(inputs.cohort_size ?? 16, inputs.budget_gbp ?? 24000) }
+}
+
 export function matchPersonas(answers: Record<string, string | null>) {
   const weights = handoff.matching.weights as Record<string, number>
   const tags = handoff.matching.persona_tags as Record<string, string[]>
@@ -85,7 +91,7 @@ export function validateHandoff() {
     components: 11,
     people: 12,
     actions: 100,
-    routes: 24,
+    routes: 28,
   }
   if (handoff.metrics.length !== expect.metrics) errors.push(`metrics ${handoff.metrics.length}`)
   if (handoff.sources.length !== expect.sources) errors.push(`sources ${handoff.sources.length}`)
