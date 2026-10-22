@@ -1,15 +1,56 @@
-import { useEffect, useState } from "react"
-import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom"
-import { CarStage, ComponentPanel } from "../components/CarStage.tsx"
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { gsap } from "gsap"
+import { useGSAP } from "@gsap/react"
+import { Link, useNavigate, useParams } from "react-router-dom"
+import { ComponentPanel } from "../components/CarStage.tsx"
 import { MetricCard } from "../components/Chrome.tsx"
 import { getComponent, handoff, listComponents } from "../lib/content.ts"
 import { useDemo } from "../lib/store.ts"
 
+gsap.registerPlugin(useGSAP)
+const CarScene = lazy(() => import("../components/CarScene.tsx").then((module) => ({ default: module.CarScene })))
+
 export function CarPage() {
   const { componentId } = useParams()
-  const [params] = useSearchParams()
   const component = componentId ? getComponent(componentId) : undefined
   const components = listComponents()
+  const reduced = useDemo((store) => store.state.reducedMotion)
+  const navigate = useNavigate()
+  const [pickedFocus, setPickedFocus] = useState<{ id: string; point: [number, number, number] }>()
+  const handleCarPick = useCallback((id: string, point: [number, number, number]) => {
+    setPickedFocus({ id, point })
+    navigate(`/car/${id}`)
+  }, [navigate])
+  const focusPoint = pickedFocus && pickedFocus.id === component?.id ? pickedFocus.point : undefined
+  const [shownId, setShownId] = useState<string | undefined>(componentId)
+  const [panelReady, setPanelReady] = useState(true)
+  const firstRender = useRef(true)
+  const detail = useRef<HTMLDivElement>(null)
+  const panelTimeline = useRef<gsap.core.Timeline | null>(null)
+  useGSAP(() => {
+    const panel = detail.current
+    if (!panel) return
+    if (firstRender.current) {
+      firstRender.current = false
+      gsap.set(panel, { autoAlpha: 1, y: 0 })
+      return
+    }
+    if (reduced) {
+      panelTimeline.current?.kill()
+      setShownId(componentId)
+      setPanelReady(true)
+      gsap.set(panel, { autoAlpha: 1, y: 0 })
+      return
+    }
+    panelTimeline.current?.kill()
+    const timeline = gsap.timeline({ defaults: { ease: "power2.out" } })
+    panelTimeline.current = timeline
+    timeline
+      .to(panel, { autoAlpha: 0, y: -8, duration: 0.16, ease: "power2.in", onStart: () => setPanelReady(false) })
+      .call(() => setShownId(componentId))
+      .to(panel, { autoAlpha: 1, y: 0, duration: 0.32, onComplete: () => setPanelReady(true) })
+  }, { dependencies: [componentId, reduced], scope: detail })
+  const shown = shownId ? getComponent(shownId) : undefined
   if (componentId && !component) {
     return (
       <section className="panel">
@@ -19,23 +60,33 @@ export function CarPage() {
     )
   }
   return (
-    <>
+    <div className="car-experience">
       <p className="muted">The car · component explorer</p>
       <div className="car-heading">
         <h1>Tap a part. See its story.</h1>
         <Link className="btn sleek" to="/car/evolution">Explore generations</Link>
       </div>
-      <div className={component ? "car-layout" : undefined}>
-        <CarStage components={components} activeId={component?.id} focusHotspot={params.get("spot") ?? undefined} />
-        {component ? <ComponentPanel component={component} spot={params.get("spot") ?? undefined} /> : (
-          <div className="chips" style={{ marginTop: 12 }}>
-            {components.map((item) => (
-              <Link key={item.id} className="chip" to={`/car/${item.id}`}>{item.label}</Link>
-            ))}
-          </div>
-        )}
+      <nav className="car-selector" aria-label="Car components">
+        <Link id="car-overview" className={!component ? "car-selector-item active" : "car-selector-item"} to="/car" aria-current={!component ? "page" : undefined}>Overview</Link>
+        {components.map((item) => (
+          <Link key={item.id} className={component?.id === item.id ? "car-selector-item active" : "car-selector-item"} to={`/car/${item.id}`} aria-current={component?.id === item.id ? "page" : undefined}>{item.label}</Link>
+        ))}
+      </nav>
+      <div className="car-layout">
+        <Suspense fallback={<div className="car-scene-shell car-scene-loading" role="status">Loading the AMR23 studio…</div>}>
+          <CarScene
+            activeId={component?.id}
+            focusPoint={focusPoint}
+            onPick={handleCarPick}
+          />
+        </Suspense>
+        <div ref={detail} className="car-detail" aria-hidden={!panelReady} inert={!panelReady}>
+          {shown ? <ComponentPanel component={shown} /> : (
+            <p className="car-overview-note">Click the car or choose a component above to explore its engineering story.</p>
+          )}
+        </div>
       </div>
-    </>
+    </div>
   )
 }
 
