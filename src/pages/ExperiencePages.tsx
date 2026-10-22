@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
-import { MetricCard } from "../components/Chrome.tsx"
 import { handoff } from "../lib/content.ts"
 import { useDemo } from "../lib/store.ts"
 
@@ -62,49 +61,6 @@ export function EnginePage() {
       {state.engineLedger.length === 0 ? <p>No demonstration record published.</p> : state.engineLedger.map((row) => <p key={row.id}>{row.value} {row.unit} · simulated</p>)}
       <p>Published footprint remains {footprint?.value} {footprint?.unit}.</p>
       <ul>{state.engineAudit.map((item, index) => <li key={`${item}-${index}`}>{item}</li>)}</ul>
-    </>
-  )
-}
-
-export function RacePage() {
-  const index = useDemo((store) => store.state.raceIndex)
-  const playing = useDemo((store) => store.state.racePlaying)
-  const events = useDemo((store) => store.state.events)
-  const replace = useDemo((store) => store.replace)
-  const snap = handoff.race.snapshots[index]
-  useEffect(() => {
-    if (!playing) return
-    const timer = window.setInterval(() => {
-      replace((current) => {
-        if (current.raceIndex >= handoff.race.snapshots.length - 1) return { ...current, racePlaying: false }
-        return { ...current, raceIndex: current.raceIndex + 1 }
-      })
-    }, handoff.race.interval_ms)
-    return () => window.clearInterval(timer)
-  }, [playing, replace])
-  return (
-    <>
-      <p className="lime">{handoff.race.badge}</p>
-      <h1>{handoff.race.title}</h1>
-      <article className="panel">
-        <p>Seeded replay · {snap.elapsed_seconds}s</p>
-        <p>Fan actions in the seed: {snap.simulated_cumulative_fan_actions}</p>
-        <p>Reservations in the seed: {snap.simulated_cumulative_reservations}</p>
-        <p>Energy mix: renewable diesel {snap.energy_mix_percent.renewable_diesel}% · grid {snap.energy_mix_percent.grid}% · solar {snap.energy_mix_percent.solar}%</p>
-      </article>
-      <article className="panel" style={{ marginTop: 12 }}>
-        <h2>This browser session</h2>
-        <p>{events.length} local demonstration events. Not added to the seeded total.</p>
-      </article>
-      <article className="panel" style={{ marginTop: 12 }}>
-        <h2>Historical report context</h2>
-        {handoff.race.historical_context_metric_ids.map((id) => <MetricCard key={id} id={id} />)}
-      </article>
-      <ul>{handoff.race.unavailable.map((item) => <li key={item}>{item} is not available.</li>)}</ul>
-      <div className="chips">
-        <button className="btn" type="button" onClick={() => replace((current) => ({ ...current, racePlaying: !current.racePlaying }))}>{playing ? "Pause" : "Play"}</button>
-        <button className="btn ghost" type="button" onClick={() => replace((current) => ({ ...current, raceIndex: 0, racePlaying: false }))}>Replay</button>
-      </div>
     </>
   )
 }

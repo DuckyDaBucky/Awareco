@@ -2,7 +2,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { Shell } from "./components/Chrome.tsx"
 import { validateHandoff } from "./lib/logic.ts"
 import { CarPage, EvolutionPage } from "./pages/CarPages.tsx"
-import { BoothPage, CampaignPage, DemoPage, EnginePage, ExperiencesPage, MethodologyPage, MissingPage, RacePage, StampPage } from "./pages/ExperiencePages.tsx"
+import { BoothPage, CampaignPage, DemoPage, EnginePage, ExperiencesPage, MethodologyPage, MissingPage, StampPage } from "./pages/ExperiencePages.tsx"
+import { RaceWeekendPage } from "./pages/RaceWeekend.tsx"
 import { HomePage } from "./pages/Home.tsx"
 import { ImpactPage } from "./pages/ImpactPages.tsx"
 import { MatchPage, PeoplePage, PersonaPage } from "./pages/PeoplePages.tsx"
@@ -27,7 +28,7 @@ export default function App() {
           <Route path="/people" element={<PeoplePage />} />
           <Route path="/match" element={<MatchPage />} />
           <Route path="/impact" element={<ImpactPage />} />
-          <Route path="/race" element={<RacePage />} />
+          <Route path="/race" element={<RaceWeekendPage />} />
           <Route path="/simulate" element={<SimulatePage />} />
           <Route path="/partners/programmes" element={<PartnerProgrammes />} />
           <Route path="/partners/programmes/:programmeId" element={<PartnerProgrammeWorkspace />} />

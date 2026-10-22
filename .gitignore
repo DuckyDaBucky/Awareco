@@ -15,6 +15,8 @@ dist-ssr
 test-results
 playwright-report
 blob-report
+.venv-race/
+.cache-race/
 
 # Editor directories and files
 .vscode/*
