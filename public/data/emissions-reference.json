@@ -1,0 +1,13 @@
+{
+  "publisher": "UK Department for Energy Security and Net Zero",
+  "title": "Greenhouse gas reporting: conversion factors 2025",
+  "url": "https://www.gov.uk/government/publications/greenhouse-gas-reporting-conversion-factors-2025",
+  "workbook": "https://assets.publishing.service.gov.uk/media/6846a4f55e92539572806125/ghg-conversion-factors-2025-full-set.xlsx",
+  "fuel": "Petrol (100% mineral petrol)",
+  "originalUnit": "tonnes",
+  "fuelsSheetRow99": { "kgCO2ePerTonne": 3154.08213, "kgCO2PerTonne": 3135, "kgCH4CO2ePerTonne": 11.0432, "kgN2OCO2ePerTonne": 8.03893 },
+  "wttFuelsSheetRow98": { "kgCO2ePerTonne": 815.93523 },
+  "conversion": "Divide original factors by 1000 for emissions per kg of fuel. Sum combustion CO2e and WTT CO2e for the illustrative fuel lifecycle (well-to-wheel) reference.",
+  "boundary": "Reference fuel production/distribution and combustion only. Not car manufacturing, team operations, freight or supply chain.",
+  "limitation": "Generic mineral-petrol reference, not the fuel blend, lifecycle factor or officially reported emissions of Aston Martin Aramco F1 Team. Tailpipe CO2 differs from combustion CO2e, which also includes CH4 and N2O."
+}

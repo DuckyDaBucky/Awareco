@@ -95,7 +95,7 @@ export function Shell({ children }: { children: ReactNode }) {
           </div>
         </div>
       ) : null}
-      <main id="main" className="page">{children}</main>
+      <main id="main" className={pathname === '/race' ? 'page race-shell' : 'page'}>{children}</main>
       <footer className="site-foot">
         <Link to="/methodology">How this demonstration works</Link>
       </footer>
